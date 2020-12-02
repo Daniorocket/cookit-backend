@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 
@@ -11,7 +12,26 @@ import (
 )
 
 func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
-
+	login := &models.Login{}
+	err := json.NewDecoder(r.Body).Decode(login)
+	if err != nil {
+		// If there is something wrong with the request body, return a 400 status
+		log.Println("Failed to decode body", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	passDB, err := models.GetPasswordByUsernameOrEmail(d.Sess, d.DatabaseName, login.Username)
+	if err != nil {
+		log.Println("Failed:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if err := bcrypt.CompareHashAndPassword([]byte(passDB), []byte(login.Password)); err != nil {
+		log.Println("Invalid username or password", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	fmt.Println("Zalogowano poprawnie!!")
 }
 func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	cred := &models.Credentials{}
@@ -26,6 +46,7 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Failed to hash password using bcrypt:", err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 	user := &models.User{
 		ID:       uuid.NewV4().String(),
@@ -37,7 +58,9 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	if err := models.RegisterUser(d.Sess, d.DatabaseName, user); err != nil {
 		log.Println("Failed:", err)
 		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
+	http.Redirect(w, r, "/v1/login", http.StatusCreated)
 }
 func (d *Handler) Verify(w http.ResponseWriter, r *http.Request) {
 
