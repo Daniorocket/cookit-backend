@@ -33,25 +33,25 @@ func initRoutes(handler handlers.Handler) Routes {
 			handler.CreateRecipe,
 		},
 		Route{
-			"CreateRecipe",
+			"Login",
 			"POST",
 			"/v1/login",
 			false,
 			handler.Login,
 		},
 		Route{
-			"CreateRecipe",
+			"Register",
 			"POST",
 			"/v1/register",
 			false,
 			handler.Register,
 		},
 		Route{
-			"CreateRecipe",
+			"Renew",
 			"POST",
-			"/v1/verify",
+			"/v1/renew",
 			false,
-			handler.Verify,
+			handler.Renew,
 		},
 	}
 }
