@@ -48,7 +48,7 @@ func initRoutes(handler handlers.Handler) Routes {
 		},
 		Route{
 			"Renew",
-			"POST",
+			"GET",
 			"/v1/renew",
 			false,
 			handler.Renew,

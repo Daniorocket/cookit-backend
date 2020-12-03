@@ -7,20 +7,14 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
-	"github.com/dgrijalva/jwt-go"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
 // Create a struct that will be encoded to a JWT.
 // We add jwt.StandardClaims as an embedded type, to provide fields like expiry time
-type Claims struct {
-	Username string `json:"username"`
-	jwt.StandardClaims
-}
-
-var jwtKey = []byte("my_secret_key")
 
 func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	login := &models.Login{}
@@ -43,23 +37,13 @@ func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	expirationTime := time.Now().Add(5 * time.Minute)
-	claims := &Claims{
-		Username: login.Username,
-		StandardClaims: jwt.StandardClaims{
-			// In JWT, the expiry time is expressed as unix milliseconds
-			ExpiresAt: expirationTime.Unix(),
-		},
-	}
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	// Create the JWT string
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := lib.CreateJWT(login.Username, expirationTime)
 	if err != nil {
-		// If there is an error in creating the JWT return an internal server error
-		w.WriteHeader(http.StatusInternalServerError)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(Token{
+	if err := json.NewEncoder(w).Encode(lib.Token{
 		Token: tokenString,
 	}); err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -98,5 +82,16 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 func (d *Handler) Renew(w http.ResponseWriter, r *http.Request) {
 	tkn := r.Context().Value("token").(string)
 	fmt.Println("Token to renew:", tkn)
-
+	newTokenString, err := lib.RenewJWT(w, r, tkn)
+	if err != nil {
+		fmt.Println("Failed to renew token:", err)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(lib.Token{
+		Token: newTokenString,
+	}); err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 }
