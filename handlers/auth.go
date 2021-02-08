@@ -33,10 +33,10 @@ func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := bcrypt.CompareHashAndPassword([]byte(passDB), []byte(login.Password)); err != nil {
 		log.Println("Invalid username or password", err)
-		w.WriteHeader(http.StatusUnauthorized)
+		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	expirationTime := time.Now().Add(5 * time.Minute)
+	expirationTime := time.Now().Add(60 * time.Minute)
 	tokenString, err := lib.CreateJWT(login.Username, expirationTime)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)

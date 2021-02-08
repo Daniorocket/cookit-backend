@@ -26,14 +26,23 @@ const (
 	Hard
 )
 
+type Categories int
+
+const (
+	Category1 Categories = iota
+	Category2
+	Category3
+)
+
 type Recipe struct {
-	ID          string
-	Name        string
-	UserID      string
-	Kitchen     KitchenStyle
-	Tags        Tags
-	ListOfSteps []string
-	Description string
+	ID               string       `json:"id" bson:"id"`
+	Name             string       `json:"name" bson:"name"`
+	UserID           string       `json:"userId" bson:"user_id"`
+	Kitchen          KitchenStyle `json:"kitchenStyle" bson:"kitchen_style"`
+	Tags             Tags         `json:"tags" bson:"tags"`
+	ListOfSteps      []string     `json:"listOfSteps" bson:"list_of_steps"`
+	ListOfCategories []Categories `json:"categories" bson:"categories"`
+	Description      string       `json:"description" bson:"description"`
 }
 
 func CreateRecipe(session *mgo.Session, db string, r Recipe) error {
