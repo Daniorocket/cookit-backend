@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Daniorocket/cookit-back/lib"
-	"github.com/Daniorocket/cookit-back/models"
+	"github.com/Daniorocket/cookit-backend/lib"
+	"github.com/Daniorocket/cookit-backend/models"
 	uuid "github.com/satori/go.uuid"
 	"golang.org/x/crypto/bcrypt"
 )

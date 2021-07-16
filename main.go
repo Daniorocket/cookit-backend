@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Daniorocket/cookit-back/handlers"
-	"github.com/Daniorocket/cookit-back/routing"
+	"github.com/Daniorocket/cookit-backend/handlers"
+	"github.com/Daniorocket/cookit-backend/routing"
 )
 
 func main() {

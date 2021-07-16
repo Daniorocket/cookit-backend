@@ -7,8 +7,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/Daniorocket/cookit-back/handlers"
-	"github.com/Daniorocket/cookit-back/logger"
+	"github.com/Daniorocket/cookit-backend/handlers"
+	"github.com/Daniorocket/cookit-backend/logger"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"

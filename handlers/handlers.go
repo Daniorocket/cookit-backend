@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/Daniorocket/cookit-back/lib"
+	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 )

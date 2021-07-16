@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"path"
 
-	"github.com/Daniorocket/cookit-back/models"
+	"github.com/Daniorocket/cookit-backend/models"
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 )

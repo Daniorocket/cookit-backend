@@ -3,7 +3,7 @@ package routing
 import (
 	"net/http"
 
-	"github.com/Daniorocket/cookit-back/handlers"
+	"github.com/Daniorocket/cookit-backend/handlers"
 )
 
 type Route struct {

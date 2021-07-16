@@ -1,4 +1,4 @@
-module github.com/Daniorocket/cookit-back
+module github.com/Daniorocket/cookit-backend
 
 go 1.15
 

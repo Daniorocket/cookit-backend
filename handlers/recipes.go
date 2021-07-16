@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/Daniorocket/cookit-back/models"
+	"github.com/Daniorocket/cookit-backend/models"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/validator.v2"
 )
