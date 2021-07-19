@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -14,11 +13,11 @@ import (
 
 func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	tkn := r.Context().Value("token").(jwtBody)
-	recipe := models.Recipe{}
-	recipe.UserID = tkn.Username
-	recipe.ID = uuid.NewV4().String()
-	recipe.Date = time.Now().UTC().String()
-	fmt.Println("username:", tkn.Username, "recipe:", recipe)
+	recipe := models.Recipe{
+		ID:     uuid.NewV4().String(),
+		UserID: tkn.Username,
+		Date:   time.Now().UTC().String(),
+	}
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
 		// If there is something wrong with the request body, return a 400 status
 		log.Println("Error:", err)
