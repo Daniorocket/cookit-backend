@@ -32,7 +32,7 @@ type apiResponse struct {
 	Error  string      `json:"error"`
 }
 
-func Authenticate(h http.Handler) http.Handler {
+func AuthenticateMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch mux.CurrentRoute(r).GetName() {
 		case "CreateRecipe", "ListRecipes", "Renew", "CreateCategory", "GetUserinfo": //Todo better way? Handlers which require auth

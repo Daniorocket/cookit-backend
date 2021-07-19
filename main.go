@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/Daniorocket/cookit-backend/handlers"
 	"github.com/Daniorocket/cookit-backend/routing"
 )
 
@@ -17,7 +16,6 @@ func main() {
 		log.Print("Failed to init Router", err)
 		return
 	}
-	router.Use(handlers.Authenticate)
 	fmt.Println("Server started!\nListening on :" + port)
 	if err = http.ListenAndServe(":"+port, router); err != nil {
 		log.Println("Failed to close server: ", err)

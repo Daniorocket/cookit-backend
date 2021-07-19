@@ -89,5 +89,6 @@ func NewRouter() (*mux.Router, error) {
 			Name(route.Name).
 			Handler(handler)
 	}
+	router.Use(handlers.AuthenticateMiddleware)
 	return router, nil
 }
