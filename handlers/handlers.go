@@ -39,9 +39,7 @@ func Authenticate(h http.Handler) http.Handler {
 			tkn, username, err := lib.VerifyAndReturnJWT(w, r)
 			if err != nil {
 				log.Println("Error:", err)
-				if err := CreateApiResponse(w, nil, http.StatusUnauthorized, "failed", "Failed to authorize user"); err != nil {
-					log.Println("Error create Api response:", err)
-				}
+				createApiResponse(w, nil, http.StatusUnauthorized, "failed", "Failed to authorize user")
 				return
 			}
 			ctx := context.WithValue(r.Context(), "token", jwtBody{Token: tkn, Username: username})
@@ -52,7 +50,7 @@ func Authenticate(h http.Handler) http.Handler {
 		h.ServeHTTP(w, r)
 	})
 }
-func CreateApiResponse(w http.ResponseWriter, data interface{}, code int, status string, err string) error {
+func createApiResponse(w http.ResponseWriter, data interface{}, code int, status string, err string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	if err := json.NewEncoder(w).Encode(apiResponse{
@@ -61,7 +59,6 @@ func CreateApiResponse(w http.ResponseWriter, data interface{}, code int, status
 		Status: status,
 		Error:  err,
 	}); err != nil {
-		return err
+		log.Println("Error create api response:", err)
 	}
-	return nil
 }
