@@ -24,12 +24,14 @@ func (d *Handler) GetListOfCategories(w http.ResponseWriter, r *http.Request) {
 	l, err := strconv.Atoi(limit)
 	if err != nil {
 	}
+
 	categories, te, err := models.GetAllCategories(d.Client, d.DatabaseName, p, l)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of categories:")
 		return
 	}
+
 	createApiResponse(w, paginationResponse{
 		Data:          categories,
 		Limit:         limit,
