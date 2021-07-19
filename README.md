@@ -1,5 +1,8 @@
 # cookit-backend
-Backend Go App contains:
+This is rest API of cooking page deployed on Heroku. Backend is written in Go 1.15. 
+Link:
+https://still-lowlands-00853.herokuapp.com
+Project contains:
 -RestApi 
--MongoDB
--...
+-Database MongoDB
+-Swagger Api documentation
