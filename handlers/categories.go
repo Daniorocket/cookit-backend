@@ -25,7 +25,7 @@ func (d *Handler) GetListOfCategories(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if err := CreateApiResponse(w, Pagination{
+	if err := CreateApiResponse(w, paginationResponse{
 		Data:          categories,
 		Limit:         limit,
 		Page:          page,
@@ -100,8 +100,7 @@ func (d *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (d *Handler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	id := vars["id"]
+	id := mux.Vars(r)["id"]
 	category, err := models.GetCategoryByID(d.Client, d.DatabaseName, id)
 	if err != nil {
 		log.Println("Error:", err)

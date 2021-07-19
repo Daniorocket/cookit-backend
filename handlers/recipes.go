@@ -13,7 +13,7 @@ import (
 )
 
 func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
-	tkn := r.Context().Value("token").(JWT)
+	tkn := r.Context().Value("token").(jwtBody)
 	recipe := models.Recipe{}
 	recipe.UserID = tkn.Username
 	recipe.ID = uuid.NewV4().String()
@@ -54,7 +54,7 @@ func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error:", err)
 		return
 	}
-	if err := CreateApiResponse(w, Pagination{
+	if err := CreateApiResponse(w, paginationResponse{
 		Data:          recipes,
 		Limit:         limit,
 		Page:          page,
@@ -82,7 +82,7 @@ func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request)
 		log.Println("Error:", err)
 		return
 	}
-	if err := CreateApiResponse(w, Pagination{
+	if err := CreateApiResponse(w, paginationResponse{
 		Data:          recipes,
 		Limit:         limit,
 		Page:          page,

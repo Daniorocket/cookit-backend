@@ -80,7 +80,7 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	CreateApiResponse(w, nil, http.StatusOK, "success", "none")
 }
 func (d *Handler) Renew(w http.ResponseWriter, r *http.Request) {
-	tkn := r.Context().Value("token").(JWT)
+	tkn := r.Context().Value("token").(jwtBody)
 	newToken, expTime, err := lib.RenewJWT(w, r, tkn.Token)
 	if err != nil {
 		log.Println("Error:", err)
@@ -97,7 +97,7 @@ func (d *Handler) Renew(w http.ResponseWriter, r *http.Request) {
 	}
 }
 func (d *Handler) GetUserinfo(w http.ResponseWriter, r *http.Request) {
-	tkn := r.Context().Value("token").(JWT)
+	tkn := r.Context().Value("token").(jwtBody)
 	user, err := models.GetUserinfo(d.Client, d.DatabaseName, tkn.Username)
 	if err != nil {
 		log.Println("Error:", err)

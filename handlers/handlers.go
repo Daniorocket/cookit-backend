@@ -15,17 +15,17 @@ type Handler struct {
 	Client       *mongo.Client
 	DatabaseName string
 }
-type JWT struct {
+type jwtBody struct {
 	Token    string
 	Username string
 }
-type Pagination struct {
+type paginationResponse struct {
 	Data          interface{} `json:"data"`
 	Limit         string      `json:"limit"`
 	Page          string      `json:"page"`
 	TotalElements int64       `json:"totalElements"`
 }
-type ApiResponse struct {
+type apiResponse struct {
 	Data   interface{} `json:"data"`
 	Status string      `json:"status"`
 	Code   int         `json:"code"`
@@ -44,7 +44,7 @@ func Authenticate(h http.Handler) http.Handler {
 				}
 				return
 			}
-			ctx := context.WithValue(r.Context(), "token", JWT{Token: tkn, Username: username})
+			ctx := context.WithValue(r.Context(), "token", jwtBody{Token: tkn, Username: username})
 			rWithCtx := r.WithContext(ctx)
 			h.ServeHTTP(w, rWithCtx)
 			return
@@ -55,7 +55,7 @@ func Authenticate(h http.Handler) http.Handler {
 func CreateApiResponse(w http.ResponseWriter, data interface{}, code int, status string, err string) error {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
-	if err := json.NewEncoder(w).Encode(ApiResponse{
+	if err := json.NewEncoder(w).Encode(apiResponse{
 		Data:   data,
 		Code:   code,
 		Status: status,
