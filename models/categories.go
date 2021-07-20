@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/Daniorocket/cookit-backend/lib"
-	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
