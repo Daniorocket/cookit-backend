@@ -62,8 +62,8 @@ func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 }
 func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request) {
 
-	data := make(map[string][]int)
-	if err := json.NewDecoder(r.Body).Decode(&data); err != nil {
+	var tags models.TagsList
+	if err := json.NewDecoder(r.Body).Decode(&tags); err != nil {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes")
 		log.Println("Error:", err)
 		return
@@ -71,7 +71,7 @@ func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request)
 
 	page := r.URL.Query().Get("page")
 	limit := r.URL.Query().Get("limit")
-	recipes, te, err := models.GetAllRecipesByTags(d.Client, d.DatabaseName, data["tags"], page, limit)
+	recipes, te, err := models.GetAllRecipesByTags(d.Client, d.DatabaseName, tags.Tags, page, limit)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes from DB")

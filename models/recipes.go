@@ -31,6 +31,10 @@ const (
 	Hard
 )
 
+type TagsList struct {
+	Tags []int `json:"tags"`
+}
+
 type Recipe struct {
 	ID               string       `json:"id" bson:"id"`
 	Name             string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
