@@ -10,7 +10,6 @@ import (
 	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
 	uuid "github.com/satori/go.uuid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +29,7 @@ func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(passDB), []byte(login.Password)); err != nil {
+	if err := lib.CompareHashAndPassword([]byte(passDB), []byte(login.Password)); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Invalid username or password")
 		return
@@ -61,7 +60,7 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(cred.Password), 8)
+	hashedPassword, err := lib.HashPassword([]byte(cred.Password))
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create user account")
@@ -87,7 +86,7 @@ func (d *Handler) Renew(w http.ResponseWriter, r *http.Request) {
 
 	tkn, ok := r.Context().Value("token").(jwtBody)
 	if !ok {
-		log.Println("Error:", errors.New("Failed to read JWT from http header"))
+		log.Println("Error:", errors.New("Error parsing JWT"))
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to read JWT from http header")
 		return
 	}
@@ -106,12 +105,14 @@ func (d *Handler) Renew(w http.ResponseWriter, r *http.Request) {
 		"none")
 }
 func (d *Handler) GetUserinfo(w http.ResponseWriter, r *http.Request) {
+
 	tkn, ok := r.Context().Value("token").(jwtBody)
 	if !ok {
 		log.Println("Error:", errors.New("Failed to read JWT from http header"))
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to read JWT from http header")
 		return
 	}
+
 	user, err := models.GetUserinfo(d.Client, d.DatabaseName, tkn.Username)
 	if err != nil {
 		log.Println("Error:", err)
