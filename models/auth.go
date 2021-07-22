@@ -9,7 +9,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-var CollectionUsers = "users"
+var collectionUsers = "users"
 var ErrCreateUser = errors.New("Failed to create user record")
 var ErrFindUser = errors.New("Failed to find user record")
 
@@ -34,7 +34,7 @@ type Login struct {
 func RegisterUser(client *mongo.Client, db string, u *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(CollectionUsers)
+	collection := client.Database(db).Collection(collectionUsers)
 	_, err := collection.InsertOne(ctx, &u)
 	if err != nil {
 		return ErrCreateUser
@@ -44,7 +44,7 @@ func RegisterUser(client *mongo.Client, db string, u *User) error {
 func GetPasswordByUsernameOrEmail(client *mongo.Client, db string, username string) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(CollectionUsers)
+	collection := client.Database(db).Collection(collectionUsers)
 	user := User{}
 	if err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user); err == nil {
 		return user.Password, nil
@@ -57,7 +57,7 @@ func GetPasswordByUsernameOrEmail(client *mongo.Client, db string, username stri
 func GetUserinfo(client *mongo.Client, db string, username string) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(CollectionUsers)
+	collection := client.Database(db).Collection(collectionUsers)
 	user := User{}
 	if err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user); err != nil {
 		return User{}, ErrFindUser

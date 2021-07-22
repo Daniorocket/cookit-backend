@@ -12,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var CollectionRecipes = "recipes"
+var collectionRecipes = "recipes"
 var ErrCreateRecipe = errors.New("Failed to create recipe record")
 var ErrFindRecipe = errors.New("Failed to find recipe record")
 
@@ -50,7 +50,7 @@ type Recipe struct {
 func CreateRecipe(client *mongo.Client, db string, r *Recipe) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(CollectionRecipes)
+	collection := client.Database(db).Collection(collectionRecipes)
 	if _, err := collection.InsertOne(ctx, &r); err != nil {
 		return ErrCreateRecipe
 	}
@@ -71,7 +71,7 @@ func GetAllRecipes(client *mongo.Client, db string, page, limit string) ([]Recip
 	findOptions.SetSkip(int64((p - 1) * l))
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(CollectionRecipes)
+	collection := client.Database(db).Collection(collectionRecipes)
 	cursor, err := collection.Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, 0, err
@@ -99,7 +99,7 @@ func GetAllRecipesByTags(client *mongo.Client, db string, tags []int, page, limi
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(CollectionRecipes)
+	collection := client.Database(db).Collection(collectionRecipes)
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(l))
 	findOptions.SetSkip(int64((p - 1) * l))
