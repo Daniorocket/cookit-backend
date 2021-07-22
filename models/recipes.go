@@ -2,9 +2,6 @@ package models
 
 import (
 	"context"
-	"errors"
-	"fmt"
-	"strconv"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -13,8 +10,6 @@ import (
 )
 
 var collectionRecipes = "recipes"
-var ErrCreateRecipe = errors.New("Failed to create recipe record")
-var ErrFindRecipe = errors.New("Failed to find recipe record")
 
 type KitchenStyle int
 
@@ -47,31 +42,28 @@ type Recipe struct {
 	Date             string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
 }
 
-func CreateRecipe(client *mongo.Client, db string, r *Recipe) error {
+type MongoRecipeRepository struct {
+	DbPointer    *mongo.Client
+	DatabaseName string
+}
+
+func (m *MongoRecipeRepository) Create(recipe Recipe) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionRecipes)
-	if _, err := collection.InsertOne(ctx, &r); err != nil {
-		return ErrCreateRecipe
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionRecipes)
+	if _, err := collection.InsertOne(ctx, &recipe); err != nil {
+		return err
 	}
 	return nil
 }
-func GetAllRecipes(client *mongo.Client, db string, page, limit string) ([]Recipe, int64, error) {
+func (m *MongoRecipeRepository) GetAll(page, limit int) ([]Recipe, int64, error) {
 	recipes := []Recipe{}
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		return nil, 0, err
-	}
-	l, err := strconv.Atoi(limit)
-	if err != nil {
-		return nil, 0, err
-	}
 	findOptions := options.Find()
-	findOptions.SetLimit(int64(l))
-	findOptions.SetSkip(int64((p - 1) * l))
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSkip(int64((page - 1) * limit))
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionRecipes)
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionRecipes)
 	cursor, err := collection.Find(ctx, bson.M{}, findOptions)
 	if err != nil {
 		return nil, 0, err
@@ -85,24 +77,15 @@ func GetAllRecipes(client *mongo.Client, db string, page, limit string) ([]Recip
 	}
 	return recipes, 0, nil
 }
-func GetAllRecipesByTags(client *mongo.Client, db string, tags []int, page, limit string) ([]Recipe, int64, error) {
-	fmt.Println("tags", tags)
+func (m *MongoRecipeRepository) GetAllByTags(tags []int, page, limit int) ([]Recipe, int64, error) {
 	recipes := []Recipe{}
 	recipe := Recipe{}
-	p, err := strconv.Atoi(page)
-	if err != nil {
-		return nil, 0, err
-	}
-	l, err := strconv.Atoi(limit)
-	if err != nil {
-		return nil, 0, err
-	}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionRecipes)
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionRecipes)
 	findOptions := options.Find()
-	findOptions.SetLimit(int64(l))
-	findOptions.SetSkip(int64((p - 1) * l))
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSkip(int64((page - 1) * limit))
 	cursor, err := collection.Find(ctx, bson.M{"tags": bson.M{"$in": tags}}, findOptions)
 	for cursor.Next(ctx) {
 		if err = cursor.Decode(&recipe); err != nil {

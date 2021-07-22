@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/validator.v2"
@@ -32,7 +33,7 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := models.CreateRecipe(d.Client, d.DatabaseName, &recipe); err != nil {
+	if err := d.RecipeRepository.Create(recipe); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
 		return
@@ -41,9 +42,13 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 }
 func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 
-	page := r.URL.Query().Get("page")
-	limit := r.URL.Query().Get("limit")
-	recipes, te, err := models.GetAllRecipes(d.Client, d.DatabaseName, page, limit)
+	page, limit, err := lib.GetPageAndLimitFromRequest(r)
+	if err != nil {
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get list of recipes")
+		log.Println("Error:", err)
+		return
+	}
+	recipes, te, err := d.CategoryRepository.GetAll(page, limit)
 	if err != nil {
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get list of recipes")
 		log.Println("Error:", err)
@@ -62,6 +67,13 @@ func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 }
 func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request) {
 
+	page, limit, err := lib.GetPageAndLimitFromRequest(r)
+	if err != nil {
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get list of recipes")
+		log.Println("Error:", err)
+		return
+	}
+
 	var tags models.TagsList
 	if err := json.NewDecoder(r.Body).Decode(&tags); err != nil {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes")
@@ -69,9 +81,7 @@ func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	page := r.URL.Query().Get("page")
-	limit := r.URL.Query().Get("limit")
-	recipes, te, err := models.GetAllRecipesByTags(d.Client, d.DatabaseName, tags.Tags, page, limit)
+	recipes, te, err := d.RecipeRepository.GetAllByTags(tags.Tags, page, limit)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes from DB")

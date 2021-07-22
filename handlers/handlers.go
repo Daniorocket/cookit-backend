@@ -6,14 +6,15 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/Daniorocket/cookit-backend/db"
 	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/gorilla/mux"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Handler struct {
-	Client       *mongo.Client
-	DatabaseName string
+	CategoryRepository db.CategoryRepository
+	RecipeRepository   db.RecipeRepository
+	AuthRepository     db.AuthRepository
 }
 type jwtBody struct {
 	Token    string
@@ -21,8 +22,8 @@ type jwtBody struct {
 }
 type paginationResponse struct {
 	Data          interface{} `json:"data"`
-	Limit         string      `json:"limit"`
-	Page          string      `json:"page"`
+	Limit         int         `json:"limit"`
+	Page          int         `json:"page"`
 	TotalElements int64       `json:"totalElements"`
 }
 type apiResponse struct {

@@ -22,7 +22,7 @@ func (d *Handler) Login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passDB, err := models.GetPasswordByUsernameOrEmail(d.Client, d.DatabaseName, login.Username)
+	passDB, err := d.AuthRepository.GetPassword(login.Username)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Invalid username or password")
@@ -67,14 +67,14 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user := &models.User{
+	user := models.User{
 		ID:       uuid.NewV4().String(),
 		Email:    cred.Email,
 		Username: cred.Username,
 		Password: string(hashedPassword),
 	}
 
-	if err := models.RegisterUser(d.Client, d.DatabaseName, user); err != nil {
+	if err := d.AuthRepository.Register(user); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create user account")
 		return
@@ -113,7 +113,7 @@ func (d *Handler) GetUserinfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := models.GetUserinfo(d.Client, d.DatabaseName, tkn.Username)
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to return userinfo")

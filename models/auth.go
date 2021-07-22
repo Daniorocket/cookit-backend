@@ -31,37 +31,43 @@ type Login struct {
 	Password string `json:"password" bson:"password"`
 }
 
-func RegisterUser(client *mongo.Client, db string, u *User) error {
+type MongoAuthRepository struct {
+	DbPointer    *mongo.Client
+	DatabaseName string
+}
+
+func (m *MongoAuthRepository) Register(user User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionUsers)
-	_, err := collection.InsertOne(ctx, &u)
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
+	_, err := collection.InsertOne(ctx, &user)
 	if err != nil {
 		return ErrCreateUser
 	}
 	return nil
 }
-func GetPasswordByUsernameOrEmail(client *mongo.Client, db string, username string) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+func (m *MongoAuthRepository) GetPassword(login string) (string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionUsers)
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
 	user := User{}
-	if err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user); err == nil {
+	if err := collection.FindOne(ctx, bson.M{"username": login}).Decode(&user); err == nil {
 		return user.Password, nil
 	}
-	if err := collection.FindOne(ctx, bson.M{"email": username}).Decode(&user); err == nil {
+	if err := collection.FindOne(ctx, bson.M{"email": login}).Decode(&user); err == nil {
 		return user.Password, nil
 	}
-	return "", ErrFindUser
+	return "", errors.New("Failed to find user with passed login")
 }
-func GetUserinfo(client *mongo.Client, db string, username string) (User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+func (m *MongoAuthRepository) GetUserinfo(username string) (User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionUsers)
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
 	user := User{}
 	if err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user); err != nil {
 		return User{}, ErrFindUser
 	}
-	user.Password = "" //Encoded password can't be sended
+	user.Password = "" //Encoded password can't be sent
 	return user, nil
 }

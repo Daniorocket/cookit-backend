@@ -18,13 +18,37 @@ type Category struct {
 	LabelEN string   `json:"labelEN" bson:"label_en"`
 	File    lib.File `json:"file" bson:"file"`
 }
+type MongoCategoryRepository struct {
+	DbPointer    *mongo.Client
+	DatabaseName string
+}
 
-func GetAllCategories(client *mongo.Client, db string, page, limit int) ([]Category, int64, error) {
+func (d *MongoCategoryRepository) GetByID(id string) (Category, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	asdasa := d.DbPointer.Database(d.DatabaseName).Collection("categories")
+	cat := Category{}
+	if err := asdasa.FindOne(ctx, bson.M{"id": id}).Decode(&cat); err == nil {
+		return Category{}, err
+	}
+	return cat, nil
+}
+
+func (d *MongoCategoryRepository) Create(c Category) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection(collectionCategory)
+	if _, err := collection.InsertOne(ctx, &c); err != nil {
+		return err
+	}
+	return nil
+}
+func (d *MongoCategoryRepository) GetAll(page, limit int) ([]Category, int64, error) {
 	var category Category
 	categories := []Category{}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-	collection := client.Database(db).Collection(collectionCategory)
+	collection := d.DbPointer.Database(d.DatabaseName).Collection(collectionCategory)
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(limit))
 	findOptions.SetSkip(int64((page - 1) * limit))
@@ -43,24 +67,4 @@ func GetAllCategories(client *mongo.Client, db string, page, limit int) ([]Categ
 		return nil, 0, err
 	}
 	return categories, totalElements, nil
-}
-func CreateCategory(client *mongo.Client, db string, category Category) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	collection := client.Database(db).Collection(collectionCategory)
-	if _, err := collection.InsertOne(ctx, &category); err != nil {
-		return err
-	}
-	return nil
-}
-func GetCategoryByID(client *mongo.Client, db, id string) (Category, error) {
-	var category Category
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-	collection := client.Database(db).Collection(collectionCategory)
-	cursor := collection.FindOne(ctx, bson.M{"id": id})
-	if err := cursor.Decode(&category); err != nil {
-		return Category{}, err
-	}
-	return category, nil
 }

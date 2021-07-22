@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"path"
-	"strconv"
 
 	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
@@ -17,16 +16,13 @@ import (
 
 func (d *Handler) GetListOfCategories(w http.ResponseWriter, r *http.Request) {
 
-	page := r.URL.Query().Get("page")
-	limit := r.URL.Query().Get("limit")
-	p, err := strconv.Atoi(page)
+	page, limit, err := lib.GetPageAndLimitFromRequest(r)
 	if err != nil {
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get list of categories")
+		log.Println("Error:", err)
+		return
 	}
-	l, err := strconv.Atoi(limit)
-	if err != nil {
-	}
-
-	categories, te, err := models.GetAllCategories(d.Client, d.DatabaseName, p, l)
+	categories, te, err := d.CategoryRepository.GetAll(page, limit)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of categories:")
@@ -67,7 +63,7 @@ func (d *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := models.CreateCategory(d.Client, d.DatabaseName, cat); err != nil {
+	if err := d.CategoryRepository.Create(cat); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to create category")
 		return
@@ -76,7 +72,7 @@ func (d *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 }
 func (d *Handler) GetCategoryByID(w http.ResponseWriter, r *http.Request) {
 	id := mux.Vars(r)["id"]
-	category, err := models.GetCategoryByID(d.Client, d.DatabaseName, id)
+	category, err := d.CategoryRepository.GetByID(id)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get category:")
