@@ -9,7 +9,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 )
 
-type Claims struct {
+type claims struct {
 	Username string `json:"username"`
 	jwt.StandardClaims
 }
@@ -22,7 +22,7 @@ type Token struct {
 }
 
 func CreateJWT(username string, expireTime time.Time) (string, error) {
-	claims := &Claims{
+	claims := &claims{
 		Username: username,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: expireTime.Unix(),
@@ -46,7 +46,7 @@ func VerifyAndReturnJWT(w http.ResponseWriter, r *http.Request) (string, string,
 		return "", "", errors.New("Failed to divide token")
 	}
 	tokenFromRequest = dividedToken[1]
-	claims := &Claims{}
+	claims := &claims{}
 
 	tkn, err := jwt.ParseWithClaims(tokenFromRequest, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
@@ -63,7 +63,7 @@ func VerifyAndReturnJWT(w http.ResponseWriter, r *http.Request) (string, string,
 	return tokenFromRequest, claims.Username, nil
 }
 func RenewJWT(w http.ResponseWriter, r *http.Request, tknStr string) (string, string, error) {
-	claims := &Claims{}
+	claims := &claims{}
 	tkn, err := jwt.ParseWithClaims(tknStr, claims, func(token *jwt.Token) (interface{}, error) {
 		return jwtKey, nil
 	})
