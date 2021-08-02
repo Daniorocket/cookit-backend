@@ -28,6 +28,9 @@ type AuthRepository interface {
 	Register(user models.User) error
 	GetPassword(login string) (string, error)
 	GetUserinfo(username string) (models.User, error)
+	CheckEmail(email string) (models.User, error)
+	Update(user models.User) error
+	GetUserByPasswordRemindID(passwordRemindID string) (models.User, error)
 }
 
 func InitMongoDatabase() (CategoryRepository, RecipeRepository, AuthRepository, error) {

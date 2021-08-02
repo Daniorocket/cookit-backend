@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"errors"
+	"fmt"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -14,12 +15,13 @@ var ErrCreateUser = errors.New("Failed to create user record")
 var ErrFindUser = errors.New("Failed to find user record")
 
 type User struct {
-	ID          string `json:"id" bson:"id"`
-	Username    string `json:"username" bson:"username"`
-	Password    string `json:"password" bson:"password"`
-	AvatarURL   string `json:"avatarURL" bson:"avatar_url"`
-	Email       string `json:"email" bson:"email"`
-	Description string `json:"description" bson:"description"`
+	ID               string `json:"id" bson:"id"`
+	Username         string `json:"username" bson:"username"`
+	Password         string `json:"password" bson:"password"`
+	AvatarURL        string `json:"avatarURL" bson:"avatar_url"`
+	Email            string `json:"email" bson:"email"`
+	Description      string `json:"description" bson:"description"`
+	PasswordRemindID string `json:"passwordRemindID" bson:"password_remind_id"`
 }
 type Credentials struct {
 	Email    string `json:"email" bson:"email"`
@@ -29,6 +31,12 @@ type Credentials struct {
 type Login struct {
 	Username string `json:"username" bson:"username"`
 	Password string `json:"password" bson:"password"`
+}
+type Email struct {
+	Email string `json:"email" bson:"email" validate:"nonnil,nonzero"`
+}
+type Password struct {
+	Password string `json:"password" bson:"password" validate:"nonnil,nonzero"`
 }
 
 type MongoAuthRepository struct {
@@ -66,8 +74,47 @@ func (m *MongoAuthRepository) GetUserinfo(username string) (User, error) {
 	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
 	user := User{}
 	if err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user); err != nil {
-		return User{}, ErrFindUser
+		return User{}, err
 	}
 	user.Password = "" //Encoded password can't be sent
+	return user, nil
+}
+func (m *MongoAuthRepository) CheckEmail(email string) (User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
+	user := User{}
+	if err := collection.FindOne(ctx, bson.M{"email": email}).Decode(&user); err != nil {
+		return User{}, err
+	}
+	return user, nil
+}
+func (m *MongoAuthRepository) Update(user User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
+	res, err := collection.UpdateOne(ctx, bson.M{"id": user.ID},
+		bson.M{"$set": bson.M{
+			"email":              user.Email,
+			"password":           user.Password,
+			"avatar_url":         user.AvatarURL,
+			"description":        user.Description,
+			"password_remind_id": user.PasswordRemindID,
+			"username":           user.Username,
+		}})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("Updated %v Documents!\n", res.ModifiedCount)
+	return nil
+}
+func (m *MongoAuthRepository) GetUserByPasswordRemindID(passwordRemindID string) (User, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
+	user := User{}
+	if err := collection.FindOne(ctx, bson.M{"password_remind_id": passwordRemindID}).Decode(&user); err != nil {
+		return User{}, err
+	}
 	return user, nil
 }

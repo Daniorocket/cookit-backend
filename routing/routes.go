@@ -88,5 +88,19 @@ func initRoutes(handler handlers.Handler) Routes {
 			false,
 			handler.GetUserinfo,
 		},
+		Route{
+			"RemindPassword",
+			"POST",
+			"/api/v1/remindpassword",
+			false,
+			handler.RemindPassword,
+		},
+		Route{
+			"RemindPassword",
+			"POST",
+			"/api/v1/remindpassword/{id}",
+			false,
+			handler.ChangePassword,
+		},
 	}
 }
