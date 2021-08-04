@@ -50,7 +50,7 @@ func initRoutes(handler handlers.Handler) Routes {
 			"Renew",
 			"GET",
 			"/api/v1/renew",
-			false,
+			true,
 			handler.Renew,
 		},
 		Route{
@@ -64,7 +64,7 @@ func initRoutes(handler handlers.Handler) Routes {
 			"CreateCategory",
 			"POST",
 			"/api/v1/category",
-			false,
+			true,
 			handler.CreateCategory,
 		},
 		Route{
@@ -85,7 +85,7 @@ func initRoutes(handler handlers.Handler) Routes {
 			"GetUserinfo",
 			"GET",
 			"/api/v1/user",
-			false,
+			true,
 			handler.GetUserinfo,
 		},
 		Route{
@@ -96,7 +96,7 @@ func initRoutes(handler handlers.Handler) Routes {
 			handler.RemindPassword,
 		},
 		Route{
-			"RemindPassword",
+			"ResetPassword",
 			"POST",
 			"/api/v1/remindpassword/{id}",
 			false,

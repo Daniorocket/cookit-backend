@@ -36,7 +36,9 @@ type apiResponse struct {
 func AuthenticateMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch mux.CurrentRoute(r).GetName() {
-		case "CreateRecipe", "ListRecipes", "Renew", "CreateCategory", "GetUserinfo": //Todo better way? Handlers which require auth
+		case "ListRecipes", "Login", "Register", "ListCategories", "GetCategoryByID", "GetRecipesByTags", "RemindPassword", "ResetPassword":
+			h.ServeHTTP(w, r)
+		default:
 			tkn, username, err := lib.VerifyAndReturnJWT(w, r)
 			if err != nil {
 				log.Println("Error:", err)
@@ -46,9 +48,7 @@ func AuthenticateMiddleware(h http.Handler) http.Handler {
 			ctx := context.WithValue(r.Context(), "token", jwtBody{Token: tkn, Username: username})
 			rWithCtx := r.WithContext(ctx)
 			h.ServeHTTP(w, rWithCtx)
-			return
 		}
-		h.ServeHTTP(w, r)
 	})
 }
 func createApiResponse(w http.ResponseWriter, data interface{}, code int, status string, err string) {

@@ -17,11 +17,11 @@ var ErrFindUser = errors.New("Failed to find user record")
 type User struct {
 	ID               string `json:"id" bson:"id"`
 	Username         string `json:"username" bson:"username"`
-	Password         string `json:"password" bson:"password"`
+	Password         string `json:"-" bson:"password"`
 	AvatarURL        string `json:"avatarURL" bson:"avatar_url"`
 	Email            string `json:"email" bson:"email"`
 	Description      string `json:"description" bson:"description"`
-	PasswordRemindID string `json:"passwordRemindID" bson:"password_remind_id"`
+	PasswordRemindID string `json:"-" bson:"password_remind_id"`
 }
 type Credentials struct {
 	Email    string `json:"email" bson:"email"`
