@@ -8,10 +8,10 @@ import (
 func CreateEmail(to, subject, msg string) error {
 
 	toList := []string{to}
-	host := "smtp.gmail.com"
+	host := os.Getenv("Email_HOST")
 	username := os.Getenv("EMAIL_LOGIN")
 	password := os.Getenv("EMAIL_PASSWORD")
-	port := "587"
+	port := os.Getenv("Email_PORT")
 	body := []byte(msg)
 	auth := smtp.PlainAuth("", username, password, host)
 

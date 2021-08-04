@@ -3,6 +3,7 @@ package lib
 import (
 	"errors"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -14,7 +15,7 @@ type claims struct {
 	jwt.StandardClaims
 }
 
-var jwtKey = []byte("my_secret_key") //Todo hide key
+var jwtKey = []byte(os.Getenv("JWT_KEY"))
 
 type Token struct {
 	Token          interface{} `json:"token"`
