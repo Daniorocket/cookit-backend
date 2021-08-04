@@ -1,0 +1,566 @@
+swagger: "2.0"
+info:
+  description: "This is API documentation of CookIt."
+  version: "1.0.0"
+  title: "CookIt"
+  termsOfService: "http://swagger.io/terms/"
+  contact:
+    email: "daniorocket@gmail.com"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+host: "cookit0.herokuapp.com"
+basePath: "/api"
+tags:
+- name: "auth"
+  description: "Endpoints for authorization."
+- name: "recipe"
+  description: "Endpoints for recipe model."
+- name: "category"
+  description: "Endpoints for category model."
+schemes:
+- "http"
+paths:
+  /v1/register:
+      post:
+        tags:
+        - "auth"
+        summary: "Add user account"
+        description: ""
+        operationId: "register"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "User email, name and password."
+          required: true
+          schema:
+            $ref: "#/definitions/Register"
+        responses:
+          "200":
+            description: "created user account"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   type: "integer"
+                   default: null
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: 200
+                error:
+                  type: "string"
+                  example: "none"
+          "400":
+            description: "Failed to create user account"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   type: "integer"
+                   default: null
+                status:
+                  type: "string"
+                  example: "failed"
+                code:
+                  type: "integer"
+                  example: 400
+                error:
+                  type: "string"
+                  example: "Invalid username or password"
+  /v1/login:
+      post:
+        tags:
+        - "auth"
+        summary: "Login"
+        description: ""
+        operationId: "login"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "User email, name and password. Username in body is nickname of user of his email."
+          required: true
+          schema:
+            $ref: "#/definitions/Login"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    token:
+                      type: "string"
+                    expirationTime:
+                      type: "string"
+                      example: "2021-07-14 13:35:05.2878806 +0200 CEST"
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: 200
+                error:
+                  type: "string"
+                  example: "none"
+          "400":
+            description: "Invalid username supplied"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "failed"
+                code:
+                  type: "integer"
+                  example: 400
+                error:
+                  type: "string"
+                  example: "Invalid username or password"
+          "404":
+            description: "User not found"
+  /v1/renew:
+    get:
+        tags:
+        - "auth"
+        summary: "Renew JWT"
+        description: "This method renew JWT.Require Authorization header with JWT."
+        operationId: "renew"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              type: "object"
+              properties:
+                data:
+                  type: "object"
+                  properties:
+                    token:
+                      type: "string"
+                    expirationTime:
+                      type: "string"
+                      example: "2021-07-14 13:35:05.2878806 +0200 CEST"
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: 200
+                error:
+                  type: "string"
+                  example: "none"
+          "400":
+            description: "Invalid token"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "failed"
+                code:
+                  type: "integer"
+                  example: 400
+                error:
+                  type: "string"
+                  example: "Invalid username or password"
+        security:
+        - token: []
+  /v1/user:
+    get:
+        tags:
+        - "auth"
+        summary: "Get userinfo from JWT"
+        description: "This require Authorization header with JWT. JWT must be valid. When data are valid password returned is always as empty string for security issues."
+        operationId: "getuserinfo"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              type: "object"
+              properties:
+                data:
+                  $ref: "#/definitions/User"
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: 200
+                error:
+                  type: "string"
+                  example: "none"
+          "401":
+            description: "Invalid token"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "failed"
+                code:
+                  type: "integer"
+                  example: 401
+                error:
+                  type: "string"
+                  example: "Failed to authorize user"
+        security:
+        - token: []
+  /v1/remindpassword:
+    post:
+        tags:
+        - "auth"
+        summary: "Send email for reset password"
+        description: "This method in  body require user email. User dont receive information, if this email is valid(exists on db) or not. This is projected for better security. "
+        operationId: "remindpassword"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "User email"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+                example: "daniorocket@gmail.com"
+        responses:
+          "200":
+            description: "successful operation(independent if email is valid or not). If email is not valid, then email won't be sent."
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: 200
+                error:
+                  type: "string"
+                  example: "none"
+  /v1/remindpassword/{id}:   
+    post:
+          tags:
+          - "auth"
+          summary: "Change password"
+          description: "This method is connected with /v1/remindpassword. If username from previous endpoint have unique email with id (link), he is able to change password on this endpoint. Id must be valid (uuidv4)"
+          operationId: "resetpassword"
+          consumes:
+          - "application/json"
+          produces:
+          - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "User email"
+            required: true
+            schema:
+              type: "object"
+              properties:
+                password:
+                  type: "string"
+                  example: "zaq12wsx"
+          - in: "path"
+            name: "id"
+            required: true
+            description: "ID should be UUIDV4 string"
+            type: "string"
+          responses:
+            "200":
+              description: "successful operation"
+              schema:
+                type: "object"
+                properties:
+                  data:
+                     default: null
+                  status:
+                    type: "string"
+                    example: "success"
+                  code:
+                    type: "integer"
+                    example: 200
+                  error:
+                    type: "string"
+                    example: "none"
+            "400":
+              description: "error"
+              schema:
+                type: "object"
+                properties:
+                  data:
+                     default: null
+                  status:
+                    type: "string"
+                    example: "failed"
+                  code:
+                    type: "integer"
+                    example: 400
+                  error:
+                    type: "string"
+                    example: "can't reset your password"
+  /v1/category:
+      post:
+        tags:
+        - "category"
+        summary: "Add category"
+        description: "This method require json and file. File is coded into Base64 and stored in DB."
+        operationId: "addcategory"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "User email, name and password."
+          required: true
+          schema:
+            $ref: "#/definitions/Category"
+        responses:
+          "200":
+            description: "Created category"
+          "500":
+            description: "Error decode JSON"
+          "400":
+            description: "Bad request"
+        security:
+        - token: []
+      get:
+        tags:
+        - "category"
+        summary: "Get all categories"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              type: "object"
+              properties:
+                data:
+                  type: "array"
+                  items:
+                    $ref: '#/definitions/Category'
+                limit:
+                  type: "string"
+                  example: "1"
+                page:
+                  type: "string"
+                  example: "1"
+                totalElements:
+                  type: "string"
+                  example: "2"
+  /v1/category/{id}:
+    get:
+      tags:
+      - "category"
+      summary: "Get category by ID"
+      description: "This method return single category object with passed ID."
+      operationId: "getcategory"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          description: "ID should be UUIDV4 string"
+          type: "string"
+      responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/Category"
+  /v1/recipes:
+      post:
+        tags:
+        - "recipe"
+        summary: "Add recipe"
+        description: "This method allow to add recipe"
+        operationId: "addrecipe"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: ""
+          required: true
+          schema:
+            $ref: "#/definitions/Recipe"
+        responses:
+          "200":
+            description: "Successful operation"
+          "400":
+            description: "Bad request"
+      get:
+        tags:
+        - "recipe"
+        summary: "Get all recipes"
+        description: "This method allow to get all recipes. Required keys page and limit for pagination"
+        operationId: "getallrecipes"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "query"
+          name: "page"
+          description: ""
+          required: true
+          type: "integer"
+        - in: "query"
+          name: "limit"
+          description: ""
+          required: true
+          type: "integer"
+        responses:
+          "200":
+            description: "Successful operation"
+          "400":
+            description: "Bad request"
+          "401":
+            description: "Unauthorized"
+  /v1/recipes/tags:
+    get:
+      tags:
+      - "recipe"
+      summary: "Get all recipes by tags"
+      description: "This method allow to get all recipe by tags. Required keys page and limit for pagination"
+      operationId: "getallrecipesbytags"
+      produces:
+        - "application/json"
+      parameters:
+      - in: "query"
+        name: "page"
+        description: ""
+        required: true
+        type: "integer"
+      - in: "query"
+        name: "limit"
+        description: ""
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Successful operation"
+        "400":
+          description: "Bad request"
+        "401":
+          description: "Unauthorized"
+definitions:
+  Register:
+      type: "object"
+      properties:
+        email:
+          type: "string"
+        username:
+          type: "string"
+        password:
+          type: "string"
+  User:
+    type: "object"
+    properties:
+        id:
+          type: "string"
+        username:
+          type: "string"
+          example: ""
+        avatarURL: 
+          type: "string"
+        email: 
+          type: "string"
+        description: 
+          type: "string"
+  Login:
+      type: "object"
+      properties:
+        username:
+          type: "string"
+        password:
+          type: "string"
+  Category:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+        labelPL:
+          type: "string"
+        labelEN:
+          type: "string"
+        file:
+          $ref: "#/definitions/File"
+  File:
+      type: "object"
+      properties:
+        encodedURL:
+          type: "string"
+        extension:
+          type: "string"
+  Recipe:
+    type: "object"
+    properties:
+      name:
+        type: "string"
+      listOfSteps:
+        type: "array"
+        items:
+          type: "string"
+          example: "a"
+      listOfCategories:
+        type: "array"
+        items:
+          $ref: "#/definitions/Category"
+      tags:
+        type: integer
+      description:
+        type: "string"
+  ApiResponse:
+    type: "object"
+    properties:
+      data:
+        description: Can be any value - string, number, boolean, array or object.
+      status:
+        type: "string"
+        description: Value success or failed
+      code:
+        type: "integer"
+        description: Value is equal to code in response HTTP
+      error:
+        type: "string"
+        description: Message of error. none - when status is success
+securityDefinitions:
+  token:
+    type: "basic"
