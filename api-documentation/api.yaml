@@ -9,7 +9,7 @@ info:
   license:
     name: "Apache 2.0"
     url: "http://www.apache.org/licenses/LICENSE-2.0.html"
-host: "localhost:5000"
+host: "cookit0.herokuapp.com"
 basePath: "/api"
 tags:
 - name: "auth"
@@ -19,7 +19,6 @@ tags:
 - name: "category"
   description: "Endpoints for category model."
 schemes:
-- "https"
 - "http"
 paths:
   /v1/register:
@@ -232,6 +231,105 @@ paths:
                   example: "Failed to authorize user"
         security:
         - token: []
+  /v1/remindpassword:
+    post:
+        tags:
+        - "auth"
+        summary: "Send email for reset password"
+        description: "This method in  body require user email. User dont receive information, if this email is valid(exists on db) or not. This is projected for better security. "
+        operationId: "remindpassword"
+        consumes:
+        - "application/json"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "User email"
+          required: true
+          schema:
+            type: "object"
+            properties:
+              email:
+                type: "string"
+                example: "daniorocket@gmail.com"
+        responses:
+          "200":
+            description: "successful operation(independent if email is valid or not). If email is not valid, then email won't be sent."
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: 200
+                error:
+                  type: "string"
+                  example: "none"
+  /v1/remindpassword/{id}:   
+    post:
+          tags:
+          - "auth"
+          summary: "Change password"
+          description: "This method is connected with /v1/remindpassword. If username from previous endpoint have unique email with id (link), he is able to change password on this endpoint. Id must be valid (uuidv4)"
+          operationId: "resetpassword"
+          consumes:
+          - "application/json"
+          produces:
+          - "application/json"
+          parameters:
+          - in: "body"
+            name: "body"
+            description: "User email"
+            required: true
+            schema:
+              type: "object"
+              properties:
+                password:
+                  type: "string"
+                  example: "zaq12wsx"
+          - in: "path"
+            name: "id"
+            required: true
+            description: "ID should be UUIDV4 string"
+            type: "string"
+          responses:
+            "200":
+              description: "successful operation"
+              schema:
+                type: "object"
+                properties:
+                  data:
+                     default: null
+                  status:
+                    type: "string"
+                    example: "success"
+                  code:
+                    type: "integer"
+                    example: 200
+                  error:
+                    type: "string"
+                    example: "none"
+            "400":
+              description: "error"
+              schema:
+                type: "object"
+                properties:
+                  data:
+                     default: null
+                  status:
+                    type: "string"
+                    example: "failed"
+                  code:
+                    type: "integer"
+                    example: 400
+                  error:
+                    type: "string"
+                    example: "can't reset your password"
   /v1/category:
       post:
         tags:
@@ -398,8 +496,6 @@ definitions:
         id:
           type: "string"
         username:
-          type: "string"
-        password:
           type: "string"
           example: ""
         avatarURL: 

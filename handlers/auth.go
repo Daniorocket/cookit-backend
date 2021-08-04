@@ -158,6 +158,7 @@ func (d *Handler) RemindPassword(w http.ResponseWriter, r *http.Request) {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to send email")
 		return
 	}
+	createApiResponse(w, nil, http.StatusOK, "success", "none")
 }
 func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	password := models.Password{}
@@ -176,7 +177,7 @@ func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	hashedPassword, err := lib.HashPassword([]byte(password.Password))
 	if err != nil {
 		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to reset password")
+		createApiResponse(w, nil, http.StatusBadRequest, "success", "Failed to reset password")
 		return
 	}
 
@@ -187,4 +188,5 @@ func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to reset password")
 		return
 	}
+	createApiResponse(w, nil, http.StatusOK, "failed", "none")
 }
