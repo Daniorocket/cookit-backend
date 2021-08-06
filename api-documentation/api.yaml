@@ -25,7 +25,7 @@ paths:
       post:
         tags:
         - "auth"
-        summary: "Add user account"
+        summary: "Register user account"
         description: ""
         operationId: "register"
         consumes:
@@ -137,8 +137,8 @@ paths:
     get:
         tags:
         - "auth"
-        summary: "Renew JWT"
-        description: "This method renew JWT.Require Authorization header with JWT."
+        summary: "Renew JSON Web Token"
+        description: "This method renew JSON Web token. Requires authorization http header contains JWT."
         operationId: "renew"
         consumes:
         - "application/json"
@@ -189,8 +189,8 @@ paths:
     get:
         tags:
         - "auth"
-        summary: "Get userinfo from JWT"
-        description: "This require Authorization header with JWT. JWT must be valid. When data are valid password returned is always as empty string for security issues."
+        summary: "Get user info from JSON Web Token"
+        description: "This method require authorization http header contains JSON Web Token."
         operationId: "getuserinfo"
         consumes:
         - "application/json"
@@ -270,6 +270,22 @@ paths:
                 error:
                   type: "string"
                   example: "none"
+          "400":
+            description: "Invalid email or json"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "failed"
+                code:
+                  type: "integer"
+                  example: 400
+                error:
+                  type: "string"
+                  example: "Failed to validate email"
   /v1/remindpassword/{id}:   
     post:
           tags:

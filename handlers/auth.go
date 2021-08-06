@@ -140,7 +140,7 @@ func (d *Handler) RemindPassword(w http.ResponseWriter, r *http.Request) {
 	user, err := d.AuthRepository.CheckEmail(email.Email)
 	if err != nil {
 		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to remind password")
+		createApiResponse(w, nil, http.StatusOK, "success", "If email is valid on DB, you will receive an email with instruction.")
 		return
 	}
 	user.PasswordRemindID = uuid.NewV4().String()
@@ -158,7 +158,7 @@ func (d *Handler) RemindPassword(w http.ResponseWriter, r *http.Request) {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to send email")
 		return
 	}
-	createApiResponse(w, nil, http.StatusOK, "success", "none")
+	createApiResponse(w, nil, http.StatusOK, "success", "If email is valid on DB, you will receive an email with instruction.")
 }
 func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	password := models.Password{}
