@@ -102,5 +102,12 @@ func initRoutes(handler handlers.Handler) Routes {
 			false,
 			handler.ChangePassword,
 		},
+		Route{
+			"EditUserAccount",
+			"PUT",
+			"/api/v1/user",
+			true,
+			handler.EditUserAccount,
+		},
 	}
 }

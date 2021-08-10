@@ -16,9 +16,9 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	tkn := r.Context().Value("token").(jwtBody)
 	recipe := models.Recipe{
-		ID:     uuid.NewV4().String(),
-		UserID: tkn.Username,
-		Date:   time.Now().UTC().String(),
+		ID:       uuid.NewV4().String(),
+		Username: tkn.Username,
+		Date:     time.Now().UTC().String(),
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
@@ -48,7 +48,7 @@ func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error:", err)
 		return
 	}
-	recipes, te, err := d.CategoryRepository.GetAll(page, limit)
+	recipes, te, err := d.RecipeRepository.GetAll(page, limit)
 	if err != nil {
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get list of recipes")
 		log.Println("Error:", err)

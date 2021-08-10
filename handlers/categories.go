@@ -1,12 +1,8 @@
 package handlers
 
 import (
-	"bytes"
-	"encoding/base64"
-	"io"
 	"log"
 	"net/http"
-	"path"
 
 	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
@@ -39,29 +35,16 @@ func (d *Handler) GetListOfCategories(w http.ResponseWriter, r *http.Request) {
 func (d *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 
 	cat := models.Category{}
-	file, err := lib.DecodeMultipartRequest(r, &cat)
+	encFile, ext, err := lib.DecodeMultipartRequest(r, &cat)
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to decode multipart request")
 		return
 	}
-	buf := bytes.NewBuffer(nil)
-	if _, err := io.Copy(buf, file); err != nil {
-		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to read file")
-		return
-	}
 
-	cat.File.EncodedURL = base64.StdEncoding.EncodeToString(buf.Bytes())
-	cat.File.Extension = path.Ext(file.FileName())
+	cat.File.EncodedURL = encFile
+	cat.File.Extension = ext
 	cat.ID = uuid.NewV4().String()
-	switch ext := cat.File.Extension; ext {
-	case ".jpg", ".JPG", ".png", ".PNG":
-	default:
-		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Bad file extension")
-		return
-	}
 
 	if err := d.CategoryRepository.Create(cat); err != nil {
 		log.Println("Error:", err)

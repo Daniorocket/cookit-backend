@@ -145,7 +145,7 @@ func (d *Handler) RemindPassword(w http.ResponseWriter, r *http.Request) {
 	}
 	user.PasswordRemindID = uuid.NewV4().String()
 
-	if err := d.AuthRepository.Update(user); err != nil {
+	if err := d.AuthRepository.Update(user.ID, user); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to reset password")
 		return
@@ -183,10 +183,39 @@ func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = string(hashedPassword)
 	user.PasswordRemindID = ""
-	if err := d.AuthRepository.Update(user); err != nil {
+	if err := d.AuthRepository.Update(user.ID, user); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to reset password")
 		return
 	}
-	createApiResponse(w, nil, http.StatusOK, "failed", "none")
+	createApiResponse(w, nil, http.StatusOK, "success", "none")
+}
+func (d *Handler) EditUserAccount(w http.ResponseWriter, r *http.Request) {
+	tkn, ok := r.Context().Value("token").(jwtBody)
+	if !ok {
+		log.Println("Error:", errors.New("Error parsing JWT"))
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to read JWT from http header")
+		return
+	}
+	usr, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get user info")
+		return
+	}
+	encFile, _, err := lib.DecodeMultipartRequest(r, &usr)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to decode multipart request")
+		return
+	}
+	if encFile != "" { //File is uploaded
+		usr.AvatarURL = encFile
+	}
+	if err := d.AuthRepository.Update(usr.ID, usr); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to update data")
+		return
+	}
+	createApiResponse(w, nil, http.StatusOK, "success", "none")
 }

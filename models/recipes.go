@@ -33,7 +33,7 @@ type TagsList struct {
 type Recipe struct {
 	ID               string       `json:"id" bson:"id"`
 	Name             string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
-	UserID           string       `json:"userID" bson:"user_id" validate:"nonnil,nonzero"`
+	Username         string       `json:"username" bson:"username" validate:"nonnil,nonzero"`
 	Kitchen          KitchenStyle `json:"kitchenStyle" bson:"kitchen_style" validate:"nonnil,nonzero"`
 	Tags             []Tags       `json:"tags" bson:"tags" validate:"nonnil,nonzero"`
 	ListOfSteps      []string     `json:"listOfSteps" bson:"list_of_steps" validate:"nonnil,nonzero"`

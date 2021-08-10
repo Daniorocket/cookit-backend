@@ -29,7 +29,7 @@ type AuthRepository interface {
 	GetPassword(login string) (string, error)
 	GetUserinfo(username string) (models.User, error)
 	CheckEmail(email string) (models.User, error)
-	Update(user models.User) error
+	Update(userID string, user models.User) error
 	GetUserByPasswordRemindID(passwordRemindID string) (models.User, error)
 }
 
