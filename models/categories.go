@@ -13,10 +13,9 @@ import (
 var collectionCategory = "categories"
 
 type Category struct {
-	ID      string   `json:"id" bson:"id"`
-	LabelPL string   `json:"labelPL" bson:"label_pl"`
-	LabelEN string   `json:"labelEN" bson:"label_en"`
-	File    lib.File `json:"file" bson:"file"`
+	ID   string   `json:"id" bson:"id"`
+	Name string   `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	File lib.File `json:"file" bson:"file" validate:"nonnil,nonzero"`
 }
 type MongoCategoryRepository struct {
 	DbPointer    *mongo.Client

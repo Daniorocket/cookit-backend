@@ -351,19 +351,23 @@ paths:
         tags:
         - "category"
         summary: "Add category"
-        description: "This method require json and file. File is coded into Base64 and stored in DB."
+        description: "This method require body and key  with name file, which will store an image. File is coded into Base64 and stored in DB."
         operationId: "addcategory"
         consumes:
-        - "application/json"
+         - "multipart/form-data"
         produces:
         - "application/json"
         parameters:
         - in: "body"
           name: "body"
-          description: "User email, name and password."
+          description: "."
           required: true
           schema:
-            $ref: "#/definitions/Category"
+            type: "object"
+            properties:
+                name:
+                  type: "string"
+                  example: "Name of category"
         responses:
           "200":
             description: "Created category"
@@ -532,9 +536,7 @@ definitions:
       properties:
         id:
           type: "string"
-        labelPL:
-          type: "string"
-        labelEN:
+        name:
           type: "string"
         file:
           $ref: "#/definitions/File"

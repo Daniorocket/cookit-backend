@@ -8,6 +8,7 @@ import (
 	"github.com/Daniorocket/cookit-backend/models"
 	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
+	"gopkg.in/validator.v2"
 )
 
 func (d *Handler) GetListOfCategories(w http.ResponseWriter, r *http.Request) {
@@ -39,6 +40,12 @@ func (d *Handler) CreateCategory(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to decode multipart request")
+		return
+	}
+
+	if err := validator.Validate(cat); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to validate json")
 		return
 	}
 
