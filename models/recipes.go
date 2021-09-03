@@ -18,28 +18,29 @@ const (
 	Russian
 )
 
-type Tags int
+type Unit struct {
+	ID     string `json:"id" bson:"id"`
+	Name   string `json:"name" bson:"name"`
+	Symbol string `json:"symbol" bson:"symbol"`
+}
 
-const (
-	Easy Tags = iota
-	Medium
-	Hard
-)
-
-type TagsList struct {
-	Tags []int `json:"tags"`
+type Ingredient struct {
+	ID     string `json:"id" bson:"id"`
+	Name   string `json:"name" bson:"name"`
+	Count  int    `json:"count" bson:"count"`
+	UnitID string `json:"unitID" bson:"unit_id"`
 }
 
 type Recipe struct {
-	ID               string       `json:"id" bson:"id"`
-	Name             string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
-	Username         string       `json:"username" bson:"username" validate:"nonnil,nonzero"`
-	Kitchen          KitchenStyle `json:"kitchenStyle" bson:"kitchen_style" validate:"nonnil,nonzero"`
-	Tags             []Tags       `json:"tags" bson:"tags" validate:"nonnil,nonzero"`
-	ListOfSteps      []string     `json:"listOfSteps" bson:"list_of_steps" validate:"nonnil,nonzero"`
-	ListOfCategories []Category   `json:"listOfCategories" bson:"list_of_categories" validate:"nonnil,nonzero"`
-	Description      string       `json:"description" bson:"description" validate:"nonnil,nonzero"`
-	Date             string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
+	ID           string       `json:"id" bson:"id"`
+	Name         string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	Username     string       `json:"username" bson:"username" validate:"nonnil,nonzero"`
+	Difficulty   int          `json:"difficulty" bson:"difficulty" validate:"min=1,max=3"`
+	Ingredients  []Ingredient `json:"ingredients" bson:"ingredients" validate:"nonnil,nonzero,min=1"`
+	Steps        []string     `json:"steps" bson:"steps" validate:"nonnil,nonzero,min=1"`
+	CategoriesID []string     `json:"categoriesID" bson:"categories_id" validate:"nonnil,nonzero,min=1"`
+	Description  string       `json:"description" bson:"description" validate:"nonnil,nonzero"`
+	Date         string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
 }
 
 type MongoRecipeRepository struct {
@@ -77,7 +78,7 @@ func (m *MongoRecipeRepository) GetAll(page, limit int) ([]Recipe, int64, error)
 	}
 	return recipes, 0, nil
 }
-func (m *MongoRecipeRepository) GetAllByTags(tags []int, page, limit int) ([]Recipe, int64, error) {
+func (m *MongoRecipeRepository) GetAllByCategories(tags []string, page, limit int) ([]Recipe, int64, error) {
 	recipes := []Recipe{}
 	recipe := Recipe{}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
