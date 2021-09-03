@@ -34,6 +34,24 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//Check if valid ingredients unitID
+	for _, v := range recipe.Ingredients {
+		if _, err := d.RecipeRepository.GetUnit(v.UnitID); err != nil {
+			log.Println("Error:", err)
+			createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
+			return
+		}
+	}
+
+	//Check if valid categoriesID
+	for _, v := range recipe.CategoriesID {
+		if _, err := d.CategoryRepository.GetByID(v); err != nil {
+			log.Println("Error:", err)
+			createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
+			return
+		}
+	}
+
 	if err := d.RecipeRepository.Create(recipe); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")

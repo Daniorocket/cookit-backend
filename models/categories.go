@@ -25,9 +25,9 @@ type MongoCategoryRepository struct {
 func (d *MongoCategoryRepository) GetByID(id string) (Category, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	asdasa := d.DbPointer.Database(d.DatabaseName).Collection("categories")
+	collection := d.DbPointer.Database(d.DatabaseName).Collection("categories")
 	cat := Category{}
-	if err := asdasa.FindOne(ctx, bson.M{"id": id}).Decode(&cat); err == nil {
+	if err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&cat); err != nil {
 		return Category{}, err
 	}
 	return cat, nil

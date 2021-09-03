@@ -22,6 +22,8 @@ type RecipeRepository interface {
 	Create(recipe models.Recipe) error
 	GetAll(page, limit int) ([]models.Recipe, int64, error)
 	GetAllByCategories(tags []string, page, limit int) ([]models.Recipe, int64, error)
+	GetUnit(unitID string) (models.Unit, error)
+	GetAllUnits() ([]models.Unit, error)
 }
 
 type AuthRepository interface {

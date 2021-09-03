@@ -10,13 +10,7 @@ import (
 )
 
 var collectionRecipes = "recipes"
-
-type KitchenStyle int
-
-const (
-	Polish KitchenStyle = iota
-	Russian
-)
+var collectionUnits = "units"
 
 type Unit struct {
 	ID     string `json:"id" bson:"id"`
@@ -25,10 +19,10 @@ type Unit struct {
 }
 
 type Ingredient struct {
-	ID     string `json:"id" bson:"id"`
-	Name   string `json:"name" bson:"name"`
-	Count  int    `json:"count" bson:"count"`
-	UnitID string `json:"unitID" bson:"unit_id"`
+	ID     string `json:"id" bson:"id" validate:"nonnil,nonzero"`
+	Name   string `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	Count  int    `json:"count" bson:"count" validate:"nonnil,nonzero"`
+	UnitID string `json:"unitID" bson:"unit_id" validate:"nonnil,nonzero"`
 }
 
 type Recipe struct {
@@ -99,4 +93,34 @@ func (m *MongoRecipeRepository) GetAllByCategories(tags []string, page, limit in
 		return nil, 0, err
 	}
 	return recipes, totalElements, nil
+}
+func (m *MongoRecipeRepository) GetUnit(unitID string) (Unit, error) {
+	unit := Unit{}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUnits)
+
+	if err := collection.FindOne(ctx, bson.M{"id": unitID}).Decode(&unit); err != nil {
+		return Unit{}, err
+	}
+	return unit, nil
+}
+func (m *MongoRecipeRepository) GetAllUnits() ([]Unit, error) {
+	unit := Unit{}
+	units := []Unit{}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUnits)
+	cursor, err := collection.Find(ctx, bson.M{}, nil)
+	if err != nil {
+		return nil, err
+	}
+	for cursor.Next(ctx) {
+		if err = cursor.Decode(&unit); err != nil {
+			return nil, err
+		}
+		units = append(units, unit)
+	}
+	return units, nil
 }
