@@ -547,22 +547,42 @@ definitions:
           type: "string"
         extension:
           type: "string"
+  Units:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          example: "2"
+        name:
+          type: "string"
+          example: "Papryka"
+        count:
+          type: "string"
+          example: 50
+        unitID:
+          type: "string"
+          example: 4
   Recipe:
     type: "object"
     properties:
       name:
         type: "string"
-      listOfSteps:
+        example: "Kurczak słodko-kwasny"
+      steps:
         type: "array"
         items:
           type: "string"
-          example: "a"
-      listOfCategories:
+          example: ["Pokrój warzywa","Podgrzej wodę przez 15 minut"]
+      difficulty:
+        type: "integer"
+        example: 2 (1-3)
+      categoriesID:
         type: "array"
         items:
-          $ref: "#/definitions/Category"
-      tags:
-        type: integer
+          type: "string"
+          example: ["7481603a-9451-47fc-97f9-f0280c8722b3","5481603a-9451-47fc-97f9-f0280c8722b3"]
+      ingredients:
+        $ref: "#/definitions/Units"
       description:
         type: "string"
   ApiResponse:
