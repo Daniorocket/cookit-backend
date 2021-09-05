@@ -10,36 +10,31 @@ import (
 )
 
 var collectionRecipes = "recipes"
+var collectionUnits = "units"
 
-type KitchenStyle int
+type Unit struct {
+	ID     string `json:"id" bson:"id"`
+	Name   string `json:"name" bson:"name"`
+	Symbol string `json:"symbol" bson:"symbol"`
+}
 
-const (
-	Polish KitchenStyle = iota
-	Russian
-)
-
-type Tags int
-
-const (
-	Easy Tags = iota
-	Medium
-	Hard
-)
-
-type TagsList struct {
-	Tags []int `json:"tags"`
+type Ingredient struct {
+	ID     string `json:"id" bson:"id" validate:"nonnil,nonzero"`
+	Name   string `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	Count  int    `json:"count" bson:"count" validate:"nonnil,nonzero"`
+	UnitID string `json:"unitID" bson:"unit_id" validate:"nonnil,nonzero"`
 }
 
 type Recipe struct {
-	ID               string       `json:"id" bson:"id"`
-	Name             string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
-	UserID           string       `json:"userID" bson:"user_id" validate:"nonnil,nonzero"`
-	Kitchen          KitchenStyle `json:"kitchenStyle" bson:"kitchen_style" validate:"nonnil,nonzero"`
-	Tags             []Tags       `json:"tags" bson:"tags" validate:"nonnil,nonzero"`
-	ListOfSteps      []string     `json:"listOfSteps" bson:"list_of_steps" validate:"nonnil,nonzero"`
-	ListOfCategories []Category   `json:"listOfCategories" bson:"list_of_categories" validate:"nonnil,nonzero"`
-	Description      string       `json:"description" bson:"description" validate:"nonnil,nonzero"`
-	Date             string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
+	ID           string       `json:"id" bson:"id"`
+	Name         string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	Username     string       `json:"username" bson:"username" validate:"nonnil,nonzero"`
+	Difficulty   int          `json:"difficulty" bson:"difficulty" validate:"min=1,max=3"`
+	Ingredients  []Ingredient `json:"ingredients" bson:"ingredients" validate:"nonnil,nonzero,min=1"`
+	Steps        []string     `json:"steps" bson:"steps" validate:"nonnil,nonzero,min=1"`
+	CategoriesID []string     `json:"categoriesID" bson:"categories_id" validate:"nonnil,nonzero,min=1"`
+	Description  string       `json:"description" bson:"description" validate:"nonnil,nonzero"`
+	Date         string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
 }
 
 type MongoRecipeRepository struct {
@@ -77,7 +72,7 @@ func (m *MongoRecipeRepository) GetAll(page, limit int) ([]Recipe, int64, error)
 	}
 	return recipes, 0, nil
 }
-func (m *MongoRecipeRepository) GetAllByTags(tags []int, page, limit int) ([]Recipe, int64, error) {
+func (m *MongoRecipeRepository) GetAllByCategories(categories CategoryID, page, limit int) ([]Recipe, int64, error) {
 	recipes := []Recipe{}
 	recipe := Recipe{}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -86,7 +81,10 @@ func (m *MongoRecipeRepository) GetAllByTags(tags []int, page, limit int) ([]Rec
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(limit))
 	findOptions.SetSkip(int64((page - 1) * limit))
-	cursor, err := collection.Find(ctx, bson.M{"tags": bson.M{"$in": tags}}, findOptions)
+	cursor, err := collection.Find(ctx, bson.M{"categories_id": bson.M{"$in": categories.CategoryID}}, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
 	for cursor.Next(ctx) {
 		if err = cursor.Decode(&recipe); err != nil {
 			return nil, 0, err
@@ -98,4 +96,34 @@ func (m *MongoRecipeRepository) GetAllByTags(tags []int, page, limit int) ([]Rec
 		return nil, 0, err
 	}
 	return recipes, totalElements, nil
+}
+func (m *MongoRecipeRepository) GetUnit(unitID string) (Unit, error) {
+	unit := Unit{}
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUnits)
+
+	if err := collection.FindOne(ctx, bson.M{"id": unitID}).Decode(&unit); err != nil {
+		return Unit{}, err
+	}
+	return unit, nil
+}
+func (m *MongoRecipeRepository) GetAllUnits() ([]Unit, error) {
+	unit := Unit{}
+	units := []Unit{}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUnits)
+	cursor, err := collection.Find(ctx, bson.M{}, nil)
+	if err != nil {
+		return nil, err
+	}
+	for cursor.Next(ctx) {
+		if err = cursor.Decode(&unit); err != nil {
+			return nil, err
+		}
+		units = append(units, unit)
+	}
+	return units, nil
 }

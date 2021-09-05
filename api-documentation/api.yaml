@@ -21,11 +21,11 @@ tags:
 schemes:
 - "http"
 paths:
-  /v1/register:
+  /v1/rejestracja:
       post:
         tags:
         - "auth"
-        summary: "Add user account"
+        summary: "Register user account"
         description: ""
         operationId: "register"
         consumes:
@@ -74,7 +74,7 @@ paths:
                 error:
                   type: "string"
                   example: "Invalid username or password"
-  /v1/login:
+  /v1/logowanie:
       post:
         tags:
         - "auth"
@@ -133,12 +133,12 @@ paths:
                   example: "Invalid username or password"
           "404":
             description: "User not found"
-  /v1/renew:
+  /v1/odnow-token:
     get:
         tags:
         - "auth"
-        summary: "Renew JWT"
-        description: "This method renew JWT.Require Authorization header with JWT."
+        summary: "Renew JSON Web Token"
+        description: "This method renew JSON Web token. Requires authorization http header contains JWT."
         operationId: "renew"
         consumes:
         - "application/json"
@@ -185,12 +185,12 @@ paths:
                   example: "Invalid username or password"
         security:
         - token: []
-  /v1/user:
+  /v1/informacje-o-uzytkowniku:
     get:
         tags:
         - "auth"
-        summary: "Get userinfo from JWT"
-        description: "This require Authorization header with JWT. JWT must be valid. When data are valid password returned is always as empty string for security issues."
+        summary: "Get user info from JSON Web Token"
+        description: "This method require authorization http header contains JSON Web Token."
         operationId: "getuserinfo"
         consumes:
         - "application/json"
@@ -231,7 +231,7 @@ paths:
                   example: "Failed to authorize user"
         security:
         - token: []
-  /v1/remindpassword:
+  /v1/przypomnij-haslo:
     post:
         tags:
         - "auth"
@@ -270,12 +270,28 @@ paths:
                 error:
                   type: "string"
                   example: "none"
-  /v1/remindpassword/{id}:   
+          "400":
+            description: "Invalid email or json"
+            schema:
+              type: "object"
+              properties:
+                data:
+                   default: null
+                status:
+                  type: "string"
+                  example: "failed"
+                code:
+                  type: "integer"
+                  example: 400
+                error:
+                  type: "string"
+                  example: "Failed to validate email"
+  /v1/przypomnij-haslo/{id}:   
     post:
           tags:
           - "auth"
           summary: "Change password"
-          description: "This method is connected with /v1/remindpassword. If username from previous endpoint have unique email with id (link), he is able to change password on this endpoint. Id must be valid (uuidv4)"
+          description: "This method is connected with /v1/przypomnij-haslo. If username from previous endpoint have unique email with id (link), he is able to change password on this endpoint. Id must be valid (uuidv4)"
           operationId: "resetpassword"
           consumes:
           - "application/json"
@@ -330,13 +346,13 @@ paths:
                   error:
                     type: "string"
                     example: "can't reset your password"
-  /v1/category:
-      post:
+  /v1/edytuj-konto:
+      put:
         tags:
-        - "category"
-        summary: "Add category"
-        description: "This method require json and file. File is coded into Base64 and stored in DB."
-        operationId: "addcategory"
+        - "auth"
+        summary: "Edit user account"
+        description: "This is endpoint for multiple form. If user wants to change his avatar, he send new avatar, using key 'file. If user wants to change his login for example, then he send on key 'json' new nickname. User can change more fields. If some field doesn't change, then don't send him in json."
+        operationId: "edituserac"
         consumes:
         - "application/json"
         produces:
@@ -344,10 +360,35 @@ paths:
         parameters:
         - in: "body"
           name: "body"
-          description: "User email, name and password."
+          description: "Fields are not required. JSON is sent on key 'json'"
+          required: false
+          schema:
+            $ref: "#/definitions/User"
+        responses:
+          "200":
+            description: "successful operation"
+  /v1/utworz-kategorie:
+      post:
+        tags:
+        - "category"
+        summary: "Add category"
+        description: "This method require body and key  with name file, which will store an image. File is coded into Base64 and stored in DB."
+        operationId: "addcategory"
+        consumes:
+         - "multipart/form-data"
+        produces:
+        - "application/json"
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "."
           required: true
           schema:
-            $ref: "#/definitions/Category"
+            type: "object"
+            properties:
+                name:
+                  type: "string"
+                  example: "Name of category"
         responses:
           "200":
             description: "Created category"
@@ -357,10 +398,22 @@ paths:
             description: "Bad request"
         security:
         - token: []
+  /v1/kategorie:
       get:
         tags:
         - "category"
         summary: "Get all categories"
+        parameters:
+        - in: "query"
+          name: "page"
+          description: ""
+          required: true
+          type: "integer"
+        - in: "query"
+          name: "limit"
+          description: ""
+          required: true
+          type: "integer"
         responses:
           "200":
             description: "successful operation"
@@ -380,7 +433,7 @@ paths:
                 totalElements:
                   type: "string"
                   example: "2"
-  /v1/category/{id}:
+  /v1/kategorie/{id}:
     get:
       tags:
       - "category"
@@ -402,7 +455,7 @@ paths:
             description: "successful operation"
             schema:
               $ref: "#/definitions/Category"
-  /v1/recipes:
+  /v1/utworz-przepis:
       post:
         tags:
         - "recipe"
@@ -425,6 +478,7 @@ paths:
             description: "Successful operation"
           "400":
             description: "Bad request"
+  /v1/przepisy:
       get:
         tags:
         - "recipe"
@@ -453,12 +507,12 @@ paths:
             description: "Bad request"
           "401":
             description: "Unauthorized"
-  /v1/recipes/tags:
+  /v1/przepisy/kategorie:
     get:
       tags:
       - "recipe"
-      summary: "Get all recipes by tags"
-      description: "This method allow to get all recipe by tags. Required keys page and limit for pagination"
+      summary: "Get all recipes by categories"
+      description: "This method allow to get all recipe by categories. Required keys page and limit for pagination"
       operationId: "getallrecipesbytags"
       produces:
         - "application/json"
@@ -473,6 +527,18 @@ paths:
         description: ""
         required: true
         type: "integer"
+      - in: "body"
+        name: "body"
+        description: ""
+        required: true
+        schema:
+            type: "object"
+            properties:
+                categoryID:
+                  type: "array"
+                  items:
+                    type: "string"
+                    example: "5481603a-9451-47fc-97f9-f0280c8722b3"
       responses:
         "200":
           description: "Successful operation"
@@ -480,6 +546,36 @@ paths:
           description: "Bad request"
         "401":
           description: "Unauthorized"
+  /v1/recipes/jednostki:
+    get:
+      tags:
+      - "recipe"
+      summary: "Get all units"
+      description: "This method allow to get all units used in recipes."
+      operationId: "getunits"
+      produces:
+        - "application/json"
+      responses:
+        "200":
+          description: "Successful operation"
+          schema:
+              type: "object"
+              properties:
+                data:
+                  type: "array"
+                  items:
+                    $ref: '#/definitions/Units'
+                status:
+                  type: "string"
+                  example: "success"
+                code:
+                  type: "integer"
+                  example: "200"
+                error:
+                  type: "string"
+                  example: "none"
+        "400":
+          description: "Bad request"
 definitions:
   Register:
       type: "object"
@@ -516,9 +612,7 @@ definitions:
       properties:
         id:
           type: "string"
-        labelPL:
-          type: "string"
-        labelEN:
+        name:
           type: "string"
         file:
           $ref: "#/definitions/File"
@@ -529,22 +623,63 @@ definitions:
           type: "string"
         extension:
           type: "string"
+  Indegredients:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          example: "2"
+        name:
+          type: "string"
+          example: "Papryka"
+        count:
+          type: "string"
+          example: 50
+        unitID:
+          type: "string"
+          example: 4
+  Units:
+      type: "object"
+      properties:
+        id:
+          type: "string"
+          example: "1"
+        name:
+          type: "string"
+          example: "kilogram"
+        symbol:
+          type: "string"
+          example: "kg"
   Recipe:
     type: "object"
     properties:
       name:
         type: "string"
-      listOfSteps:
+        example: "Kurczak słodko-kwasny"
+      steps:
         type: "array"
         items:
           type: "string"
-          example: "a"
-      listOfCategories:
+          example: ["Pokrój warzywa","Podgrzej wodę przez 15 minut"]
+      difficulty:
+        type: "integer"
+        example: 2 (1-3)
+      categoriesID:
         type: "array"
         items:
-          $ref: "#/definitions/Category"
-      tags:
-        type: integer
+          type: "string"
+          example: ["7481603a-9451-47fc-97f9-f0280c8722b3","5481603a-9451-47fc-97f9-f0280c8722b3"]
+      ingredients:
+        type: "object"
+        properties:
+          name:
+            type: "string"
+            example: "Sol"
+          count:
+            type: "integer"
+            example: 25
+          unitID:
+            type: "string"
       description:
         type: "string"
   ApiResponse:

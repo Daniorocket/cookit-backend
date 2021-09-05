@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -15,16 +16,36 @@ import (
 func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 
 	tkn := r.Context().Value("token").(jwtBody)
+
 	recipe := models.Recipe{
-		ID:     uuid.NewV4().String(),
-		UserID: tkn.Username,
-		Date:   time.Now().UTC().String(),
+		ID:       uuid.NewV4().String(),
+		Username: tkn.Username,
+		Date:     time.Now().UTC().String(),
 	}
 
 	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to decode json")
 		return
+	}
+
+	//Check if valid ingredients unitID
+	for i, v := range recipe.Ingredients {
+		if _, err := d.RecipeRepository.GetUnit(v.UnitID); err != nil {
+			log.Println("Error:", err)
+			createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
+			return
+		}
+		recipe.Ingredients[i].ID = uuid.NewV4().String()
+	}
+
+	//Check if valid categoriesID
+	for _, v := range recipe.CategoriesID {
+		if _, err := d.CategoryRepository.GetByID(v); err != nil {
+			log.Println("Error:", err)
+			createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
+			return
+		}
 	}
 
 	if err := validator.Validate(recipe); err != nil {
@@ -48,7 +69,7 @@ func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error:", err)
 		return
 	}
-	recipes, te, err := d.CategoryRepository.GetAll(page, limit)
+	recipes, te, err := d.RecipeRepository.GetAll(page, limit)
 	if err != nil {
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get list of recipes")
 		log.Println("Error:", err)
@@ -65,7 +86,7 @@ func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 		"success",
 		"none")
 }
-func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request) {
+func (d *Handler) GetListOfRecipesByCategories(w http.ResponseWriter, r *http.Request) {
 
 	page, limit, err := lib.GetPageAndLimitFromRequest(r)
 	if err != nil {
@@ -74,17 +95,18 @@ func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var tags models.TagsList
-	if err := json.NewDecoder(r.Body).Decode(&tags); err != nil {
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes")
+	var categoriesID models.CategoryID
+	if err := json.NewDecoder(r.Body).Decode(&categoriesID); err != nil {
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of categories")
 		log.Println("Error:", err)
 		return
 	}
 
-	recipes, te, err := d.RecipeRepository.GetAllByTags(tags.Tags, page, limit)
+	fmt.Println("categories id:,", categoriesID)
+	recipes, te, err := d.RecipeRepository.GetAllByCategories(categoriesID, page, limit)
 	if err != nil {
 		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes from DB")
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of recipes")
 		return
 	}
 
@@ -97,4 +119,13 @@ func (d *Handler) GetListOfRecipesByTags(w http.ResponseWriter, r *http.Request)
 		http.StatusOK,
 		"success",
 		"none")
+}
+func (d *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
+	units, err := d.RecipeRepository.GetAllUnits()
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get units:")
+		return
+	}
+	createApiResponse(w, units, http.StatusOK, "success", "none")
 }

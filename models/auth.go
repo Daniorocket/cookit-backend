@@ -76,7 +76,6 @@ func (m *MongoAuthRepository) GetUserinfo(username string) (User, error) {
 	if err := collection.FindOne(ctx, bson.M{"username": username}).Decode(&user); err != nil {
 		return User{}, err
 	}
-	user.Password = "" //Encoded password can't be sent
 	return user, nil
 }
 func (m *MongoAuthRepository) CheckEmail(email string) (User, error) {
@@ -89,11 +88,11 @@ func (m *MongoAuthRepository) CheckEmail(email string) (User, error) {
 	}
 	return user, nil
 }
-func (m *MongoAuthRepository) Update(user User) error {
+func (m *MongoAuthRepository) Update(userID string, user User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	collection := m.DbPointer.Database(m.DatabaseName).Collection(collectionUsers)
-	res, err := collection.UpdateOne(ctx, bson.M{"id": user.ID},
+	res, err := collection.UpdateOne(ctx, bson.M{"id": userID},
 		bson.M{"$set": bson.M{
 			"email":              user.Email,
 			"password":           user.Password,

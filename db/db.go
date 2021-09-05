@@ -21,7 +21,9 @@ type CategoryRepository interface {
 type RecipeRepository interface {
 	Create(recipe models.Recipe) error
 	GetAll(page, limit int) ([]models.Recipe, int64, error)
-	GetAllByTags(tags []int, page, limit int) ([]models.Recipe, int64, error)
+	GetAllByCategories(categories models.CategoryID, page, limit int) ([]models.Recipe, int64, error)
+	GetUnit(unitID string) (models.Unit, error)
+	GetAllUnits() ([]models.Unit, error)
 }
 
 type AuthRepository interface {
@@ -29,7 +31,7 @@ type AuthRepository interface {
 	GetPassword(login string) (string, error)
 	GetUserinfo(username string) (models.User, error)
 	CheckEmail(email string) (models.User, error)
-	Update(user models.User) error
+	Update(userID string, user models.User) error
 	GetUserByPasswordRemindID(passwordRemindID string) (models.User, error)
 }
 
@@ -90,7 +92,7 @@ func InitMongoDatabase() (CategoryRepository, RecipeRepository, AuthRepository, 
 	}
 	collection = client.Database("CookIt").Collection("categories")
 	//Index for categories
-	keys = []string{"id", "label_pl", "label_en"}
+	keys = []string{"id", "name"}
 	for i := range keys {
 		if _, err := collection.Indexes().CreateOne(
 			context.Background(),

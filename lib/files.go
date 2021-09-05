@@ -1,10 +1,12 @@
 package lib
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"io"
-	"mime/multipart"
 	"net/http"
+	"path"
 )
 
 type File struct {
@@ -12,33 +14,39 @@ type File struct {
 	Extension  string `json:"extension" bson:"extension"`
 }
 
-func DecodeMultipartRequest(r *http.Request, data interface{}) (*multipart.Part, error) {
-
-	var file *multipart.Part
+func DecodeMultipartRequest(r *http.Request, data interface{}) (string, string, error) {
+	buf := bytes.NewBuffer(nil)
 	var js *json.Decoder
+	var ext string
 	mr, err := r.MultipartReader()
 	if err != nil {
-		return nil, err
+		return "", "", err
 	}
-
 	for {
 		part, err := mr.NextPart()
 		if err == io.EOF { //End of multipart data
 			break
 		}
 		if err != nil {
-			return nil, err
+			return "", "", err
 		}
 		if part.FormName() == "file" {
-			file = part
+			if _, err := io.Copy(buf, part); err != nil {
+				return "", "", err
+			}
+			ext = path.Ext(part.FileName())
+			switch ext {
+			case ".jpg", ".JPG", ".png", ".PNG":
+			default:
+				return "", "", err
+			}
 		}
 		if part.FormName() == "json" {
 			js = json.NewDecoder(part)
 			if err := js.Decode(&data); err != nil {
-				return nil, err
+				return "", "", err
 			}
 		}
 	}
-
-	return file, nil
+	return base64.StdEncoding.EncodeToString(buf.Bytes()), ext, nil
 }

@@ -140,25 +140,25 @@ func (d *Handler) RemindPassword(w http.ResponseWriter, r *http.Request) {
 	user, err := d.AuthRepository.CheckEmail(email.Email)
 	if err != nil {
 		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to remind password")
+		createApiResponse(w, nil, http.StatusOK, "success", "If email is valid on DB, you will receive an email with instruction.")
 		return
 	}
 	user.PasswordRemindID = uuid.NewV4().String()
 
-	if err := d.AuthRepository.Update(user); err != nil {
+	if err := d.AuthRepository.Update(user.ID, user); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to reset password")
 		return
 	}
 
 	if err := lib.CreateEmail(email.Email, "Zmiana hasła w serwisie CookIT", "Dzień dobry.\nAby zmienić swoje hasło proszę przejść na stronę:"+
-		"http://localhost:5000/api/v1/remindpassword/"+
+		"https://cookit0.herokuapp.com/api/v1/przypomnij-haslo/"+
 		user.PasswordRemindID); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to send email")
 		return
 	}
-	createApiResponse(w, nil, http.StatusOK, "success", "none")
+	createApiResponse(w, nil, http.StatusOK, "success", "If email is valid on DB, you will receive an email with instruction.")
 }
 func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 	password := models.Password{}
@@ -183,10 +183,39 @@ func (d *Handler) ChangePassword(w http.ResponseWriter, r *http.Request) {
 
 	user.Password = string(hashedPassword)
 	user.PasswordRemindID = ""
-	if err := d.AuthRepository.Update(user); err != nil {
+	if err := d.AuthRepository.Update(user.ID, user); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to reset password")
 		return
 	}
-	createApiResponse(w, nil, http.StatusOK, "failed", "none")
+	createApiResponse(w, nil, http.StatusOK, "success", "none")
+}
+func (d *Handler) EditUserAccount(w http.ResponseWriter, r *http.Request) {
+	tkn, ok := r.Context().Value("token").(jwtBody)
+	if !ok {
+		log.Println("Error:", errors.New("Error parsing JWT"))
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to read JWT from http header")
+		return
+	}
+	usr, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get user info")
+		return
+	}
+	encFile, _, err := lib.DecodeMultipartRequest(r, &usr)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to decode multipart request")
+		return
+	}
+	if encFile != "" { //File is uploaded
+		usr.AvatarURL = encFile
+	}
+	if err := d.AuthRepository.Update(usr.ID, usr); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to update data")
+		return
+	}
+	createApiResponse(w, nil, http.StatusOK, "success", "none")
 }

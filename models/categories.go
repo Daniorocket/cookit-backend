@@ -13,10 +13,12 @@ import (
 var collectionCategory = "categories"
 
 type Category struct {
-	ID      string   `json:"id" bson:"id"`
-	LabelPL string   `json:"labelPL" bson:"label_pl"`
-	LabelEN string   `json:"labelEN" bson:"label_en"`
-	File    lib.File `json:"file" bson:"file"`
+	ID   string   `json:"id" bson:"id"`
+	Name string   `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	File lib.File `json:"file" bson:"file" validate:"nonnil,nonzero"`
+}
+type CategoryID struct {
+	CategoryID []string `json:"categoryID" bson:"category_id" validate:"nonnil,nonzero"`
 }
 type MongoCategoryRepository struct {
 	DbPointer    *mongo.Client
@@ -26,9 +28,9 @@ type MongoCategoryRepository struct {
 func (d *MongoCategoryRepository) GetByID(id string) (Category, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
-	asdasa := d.DbPointer.Database(d.DatabaseName).Collection("categories")
+	collection := d.DbPointer.Database(d.DatabaseName).Collection("categories")
 	cat := Category{}
-	if err := asdasa.FindOne(ctx, bson.M{"id": id}).Decode(&cat); err == nil {
+	if err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&cat); err != nil {
 		return Category{}, err
 	}
 	return cat, nil
