@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -28,19 +29,14 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := validator.Validate(recipe); err != nil {
-		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to validate json")
-		return
-	}
-
 	//Check if valid ingredients unitID
-	for _, v := range recipe.Ingredients {
+	for i, v := range recipe.Ingredients {
 		if _, err := d.RecipeRepository.GetUnit(v.UnitID); err != nil {
 			log.Println("Error:", err)
 			createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
 			return
 		}
+		recipe.Ingredients[i].ID = uuid.NewV4().String()
 	}
 
 	//Check if valid categoriesID
@@ -50,6 +46,12 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 			createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to create recipe")
 			return
 		}
+	}
+
+	if err := validator.Validate(recipe); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to validate json")
+		return
 	}
 
 	if err := d.RecipeRepository.Create(recipe); err != nil {
@@ -93,13 +95,14 @@ func (d *Handler) GetListOfRecipesByCategories(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var categoriesID []string
+	var categoriesID models.CategoryID
 	if err := json.NewDecoder(r.Body).Decode(&categoriesID); err != nil {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to get list of categories")
 		log.Println("Error:", err)
 		return
 	}
 
+	fmt.Println("categories id:,", categoriesID)
 	recipes, te, err := d.RecipeRepository.GetAllByCategories(categoriesID, page, limit)
 	if err != nil {
 		log.Println("Error:", err)
@@ -116,4 +119,13 @@ func (d *Handler) GetListOfRecipesByCategories(w http.ResponseWriter, r *http.Re
 		http.StatusOK,
 		"success",
 		"none")
+}
+func (d *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
+	units, err := d.RecipeRepository.GetAllUnits()
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", "Failed to get units:")
+		return
+	}
+	createApiResponse(w, units, http.StatusOK, "success", "none")
 }

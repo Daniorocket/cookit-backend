@@ -28,7 +28,7 @@ func initRoutes(handler handlers.Handler) Routes {
 		Route{
 			"CreateRecipe",
 			"POST",
-			"/api/v1/dodaj-przepis",
+			"/api/v1/utworz-przepis",
 			true,
 			handler.CreateRecipe,
 		},
@@ -63,7 +63,7 @@ func initRoutes(handler handlers.Handler) Routes {
 		Route{
 			"CreateCategory",
 			"POST",
-			"/api/v1/stworz-kategorie",
+			"/api/v1/utworz-kategorie",
 			true,
 			handler.CreateCategory,
 		},
@@ -75,7 +75,7 @@ func initRoutes(handler handlers.Handler) Routes {
 			handler.GetCategoryByID,
 		},
 		Route{
-			"GetRecipesByTags",
+			"GetRecipesByCategories",
 			"GET",
 			"/api/v1/przepisy/kategorie",
 			false,
@@ -84,7 +84,7 @@ func initRoutes(handler handlers.Handler) Routes {
 		Route{
 			"GetUserinfo",
 			"GET",
-			"/api/v1/user",
+			"/api/v1/informacje-o-uzytkowniku",
 			true,
 			handler.GetUserinfo,
 		},
@@ -108,6 +108,13 @@ func initRoutes(handler handlers.Handler) Routes {
 			"/api/v1/edytuj-konto",
 			true,
 			handler.EditUserAccount,
+		},
+		Route{
+			"GetUnits",
+			"GET",
+			"/api/v1/jednostki",
+			true,
+			handler.GetUnits,
 		},
 	}
 }

@@ -152,7 +152,7 @@ func (d *Handler) RemindPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := lib.CreateEmail(email.Email, "Zmiana hasła w serwisie CookIT", "Dzień dobry.\nAby zmienić swoje hasło proszę przejść na stronę:"+
-		"http://localhost:5000/api/v1/remindpassword/"+
+		"https://cookit0.herokuapp.com/api/v1/przypomnij-haslo/"+
 		user.PasswordRemindID); err != nil {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", "Failed to send email")

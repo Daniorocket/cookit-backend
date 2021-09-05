@@ -72,7 +72,7 @@ func (m *MongoRecipeRepository) GetAll(page, limit int) ([]Recipe, int64, error)
 	}
 	return recipes, 0, nil
 }
-func (m *MongoRecipeRepository) GetAllByCategories(tags []string, page, limit int) ([]Recipe, int64, error) {
+func (m *MongoRecipeRepository) GetAllByCategories(categories CategoryID, page, limit int) ([]Recipe, int64, error) {
 	recipes := []Recipe{}
 	recipe := Recipe{}
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -81,7 +81,10 @@ func (m *MongoRecipeRepository) GetAllByCategories(tags []string, page, limit in
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(limit))
 	findOptions.SetSkip(int64((page - 1) * limit))
-	cursor, err := collection.Find(ctx, bson.M{"tags": bson.M{"$in": tags}}, findOptions)
+	cursor, err := collection.Find(ctx, bson.M{"categories_id": bson.M{"$in": categories.CategoryID}}, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
 	for cursor.Next(ctx) {
 		if err = cursor.Decode(&recipe); err != nil {
 			return nil, 0, err

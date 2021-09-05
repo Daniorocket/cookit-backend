@@ -17,6 +17,9 @@ type Category struct {
 	Name string   `json:"name" bson:"name" validate:"nonnil,nonzero"`
 	File lib.File `json:"file" bson:"file" validate:"nonnil,nonzero"`
 }
+type CategoryID struct {
+	CategoryID []string `json:"categoryID" bson:"category_id" validate:"nonnil,nonzero"`
+}
 type MongoCategoryRepository struct {
 	DbPointer    *mongo.Client
 	DatabaseName string
