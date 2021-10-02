@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/Daniorocket/cookit-backend/lib"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -26,15 +27,17 @@ type Ingredient struct {
 }
 
 type Recipe struct {
-	ID           string       `json:"id" bson:"id"`
-	Name         string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
-	Username     string       `json:"username" bson:"username" validate:"nonnil,nonzero"`
-	Difficulty   int          `json:"difficulty" bson:"difficulty" validate:"min=1,max=3"`
-	Ingredients  []Ingredient `json:"ingredients" bson:"ingredients" validate:"nonnil,nonzero,min=1"`
-	Steps        []string     `json:"steps" bson:"steps" validate:"nonnil,nonzero,min=1"`
-	CategoriesID []string     `json:"categoriesID" bson:"categories_id" validate:"nonnil,nonzero,min=1"`
-	Description  string       `json:"description" bson:"description" validate:"nonnil,nonzero"`
-	Date         string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
+	ID            string       `json:"id" bson:"id"`
+	Name          string       `json:"name" bson:"name" validate:"nonnil,nonzero"`
+	Username      string       `json:"username" bson:"username" validate:"nonnil,nonzero"`
+	Difficulty    int          `json:"difficulty" bson:"difficulty" validate:"min=1,max=3"`
+	Ingredients   []Ingredient `json:"ingredients" bson:"ingredients" validate:"nonnil,nonzero,min=1"`
+	Steps         []string     `json:"steps" bson:"steps" validate:"nonnil,nonzero,min=1"`
+	CategoriesID  []string     `json:"categoriesID" bson:"categories_id" validate:"nonnil,nonzero,min=1"`
+	Description   string       `json:"description" bson:"description" validate:"nonnil,nonzero"`
+	Date          string       `json:"date" bson:"date" validate:"nonnil,nonzero"`
+	PreparingTime int          `json:"preparingTime" bson:"preparing_time" validate:"nonnil,nonzero"`
+	File          lib.File     `json:"file" bson:"file" validate:"nonnil,nonzero"`
 }
 
 type MongoRecipeRepository struct {

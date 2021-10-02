@@ -26,13 +26,15 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 		Username: tkn.Username,
 		Date:     time.Now().UTC().String(),
 	}
-
-	if err := json.NewDecoder(r.Body).Decode(&recipe); err != nil {
+	encFile, ext, err := lib.DecodeMultipartRequest(r, &recipe)
+	if err != nil {
 		log.Println("Error:", err)
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorJSON)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorMultipartData)
 		return
 	}
 
+	recipe.File.EncodedURL = encFile
+	recipe.File.Extension = ext
 	//Check if valid ingredients unitID
 	for i, v := range recipe.Ingredients {
 		if _, err := d.RecipeRepository.GetUnit(v.UnitID); err != nil {
