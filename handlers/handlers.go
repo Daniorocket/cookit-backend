@@ -11,6 +11,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var noError = "brak błędu"
+var errorJSON = "Wprowadzono nieprawidłowe dane."
+var errorVerifyJWT = "Token uwierzytelniający jest nieprawidłowy."
+
+var errorMultipartData = "Nie udało się pobrać danych w formacie JSON, lub zdjęcia."
+var errorUpdateData = "Nie udało się zaktualizować danych."
+
 type Handler struct {
 	CategoryRepository db.CategoryRepository
 	RecipeRepository   db.RecipeRepository
