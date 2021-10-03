@@ -20,8 +20,7 @@ type CategoryRepository interface {
 
 type RecipeRepository interface {
 	Create(recipe models.Recipe) error
-	GetAll(page, limit int) ([]models.Recipe, int64, error)
-	GetAllByCategories(categories models.CategoryID, page, limit int) ([]models.Recipe, int64, error)
+	GetAll(categories []string, page, limit int, name string) ([]models.Recipe, int64, error)
 	GetUnit(unitID string) (models.Unit, error)
 	GetAllUnits() ([]models.Unit, error)
 }

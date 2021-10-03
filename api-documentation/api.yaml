@@ -482,41 +482,13 @@ paths:
             description: "Bad request"
         security:
         - token: []
+
   /v1/przepisy:
-      get:
-        tags:
-        - "recipe"
-        summary: "Get all recipes"
-        description: "This method allow to get all recipes. Required keys page and limit for pagination"
-        operationId: "getallrecipes"
-        consumes:
-        - "application/json"
-        produces:
-        - "application/json"
-        parameters:
-        - in: "query"
-          name: "page"
-          description: ""
-          required: true
-          type: "integer"
-        - in: "query"
-          name: "limit"
-          description: ""
-          required: true
-          type: "integer"
-        responses:
-          "200":
-            description: "Successful operation"
-          "400":
-            description: "Bad request"
-          "401":
-            description: "Unauthorized"
-  /v1/przepisy/kategorie:
     get:
       tags:
       - "recipe"
-      summary: "Get all recipes by categories"
-      description: "This method allow to get all recipe by categories. Required keys page and limit for pagination"
+      summary: "Get all recipes with filter"
+      description: "This method allow to get all recipe byname or categories id table. Name can be substring. Required keys page and limit for pagination. Body can be clear, and name not required - then will be returned all recipes."
       operationId: "getallrecipesbytags"
       produces:
         - "application/json"
@@ -531,10 +503,15 @@ paths:
         description: ""
         required: true
         type: "integer"
+      - in: "query"
+        name: "name"
+        description: ""
+        required: false
+        type: "string"
       - in: "body"
         name: "body"
         description: ""
-        required: true
+        required: false
         schema:
             type: "object"
             properties:
