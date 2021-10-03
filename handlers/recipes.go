@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"time"
@@ -68,50 +68,22 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 	createApiResponse(w, nil, http.StatusOK, "success", noError)
 }
 func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
-
+	name := r.URL.Query().Get("name")
 	page, limit, err := lib.GetPageAndLimitFromRequest(r)
 	if err != nil {
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetRecipes)
 		log.Println("Error:", err)
 		return
 	}
-	recipes, te, err := d.RecipeRepository.GetAll(page, limit)
-	if err != nil {
-		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetRecipes)
-		log.Println("Error:", err)
-		return
-	}
-
-	createApiResponse(w, paginationResponse{
-		Data:          recipes,
-		Limit:         limit,
-		Page:          page,
-		TotalElements: te,
-	},
-		http.StatusOK,
-		"success",
-		noError)
-}
-func (d *Handler) GetListOfRecipesByCategories(w http.ResponseWriter, r *http.Request) {
-
-	page, limit, err := lib.GetPageAndLimitFromRequest(r)
-	if err != nil {
-		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetRecipes)
-		log.Println("Error:", err)
-		return
-	}
-
-	var categoriesID models.CategoryID
-	if err := json.NewDecoder(r.Body).Decode(&categoriesID); err != nil {
+	var categoryID models.CategoryID
+	if err := json.NewDecoder(r.Body).Decode(&categoryID); err != nil && err != io.EOF {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorGetRecipes)
 		log.Println("Error:", err)
 		return
 	}
 
-	fmt.Println("categories id:,", categoriesID)
-	recipes, te, err := d.RecipeRepository.GetAllByCategories(categoriesID, page, limit)
+	recipes, te, err := d.RecipeRepository.GetAll(categoryID.CategoryID, page, limit, name)
 	if err != nil {
-		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorGetRecipes)
 		return
 	}

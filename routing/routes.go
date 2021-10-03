@@ -75,13 +75,6 @@ func initRoutes(handler handlers.Handler) Routes {
 			handler.GetCategoryByID,
 		},
 		Route{
-			"GetRecipesByCategories",
-			"GET",
-			"/api/v1/przepisy/kategorie",
-			false,
-			handler.GetListOfRecipesByCategories,
-		},
-		Route{
 			"GetUserinfo",
 			"GET",
 			"/api/v1/informacje-o-uzytkowniku",
