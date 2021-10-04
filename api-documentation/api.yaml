@@ -508,18 +508,11 @@ paths:
         description: ""
         required: false
         type: "string"
-      - in: "body"
-        name: "body"
+      - in: "query"
+        name: "categories"
         description: ""
         required: false
-        schema:
-            type: "object"
-            properties:
-                categoryID:
-                  type: "array"
-                  items:
-                    type: "string"
-                    example: "5481603a-9451-47fc-97f9-f0280c8722b3"
+        type: "string"
       responses:
         "200":
           description: "Successful operation"
