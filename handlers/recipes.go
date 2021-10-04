@@ -1,10 +1,9 @@
 package handlers
 
 import (
-	"encoding/json"
-	"io"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/Daniorocket/cookit-backend/lib"
@@ -69,20 +68,15 @@ func (d *Handler) CreateRecipe(w http.ResponseWriter, r *http.Request) {
 }
 func (d *Handler) GetListOfRecipes(w http.ResponseWriter, r *http.Request) {
 	name := r.URL.Query().Get("name")
+	categories := r.URL.Query().Get("categories")
+	cat := strings.Split(categories, ",")
 	page, limit, err := lib.GetPageAndLimitFromRequest(r)
 	if err != nil {
 		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetRecipes)
 		log.Println("Error:", err)
 		return
 	}
-	var categoryID models.CategoryID
-	if err := json.NewDecoder(r.Body).Decode(&categoryID); err != nil && err != io.EOF {
-		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorGetRecipes)
-		log.Println("Error:", err)
-		return
-	}
-
-	recipes, te, err := d.RecipeRepository.GetAll(categoryID.CategoryID, page, limit, name)
+	recipes, te, err := d.RecipeRepository.GetAll(cat, page, limit, name)
 	if err != nil {
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorGetRecipes)
 		return

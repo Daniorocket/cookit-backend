@@ -41,10 +41,6 @@ type Recipe struct {
 	File          lib.File     `json:"file" bson:"file" validate:"nonnil,nonzero"`
 }
 
-type CategoryID struct {
-	CategoryID []string `json:"categoryID" bson:"category_id"`
-}
-
 type MongoRecipeRepository struct {
 	DbPointer    *mongo.Client
 	DatabaseName string
@@ -69,14 +65,14 @@ func (m *MongoRecipeRepository) GetAll(categories []string, page, limit int, nam
 	findOptions := options.Find()
 	findOptions.SetLimit(int64(limit))
 	findOptions.SetSkip(int64((page - 1) * limit))
-	if len(categories) > 0 && len(name) > 0 {
+	if categories[0] != "" && len(name) > 0 {
 		filter = bson.M{
 			"$and": []bson.M{
 				{"categories_id": bson.M{"$in": categories}},
 				{"name": primitive.Regex{Pattern: name, Options: "i"}},
 			},
 		}
-	} else if len(categories) > 0 {
+	} else if categories[0] != "" {
 		filter = bson.M{"categories_id": bson.M{"$in": categories}}
 	} else if len(name) > 0 {
 		filter = bson.M{"name": primitive.Regex{Pattern: name, Options: ""}}
