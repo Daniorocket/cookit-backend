@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 
@@ -17,6 +18,7 @@ var errorVerifyJWT = "Token uwierzytelniający jest nieprawidłowy."
 
 var errorMultipartData = "Nie udało się pobrać danych w formacie JSON, lub zdjęcia."
 var errorUpdateData = "Nie udało się zaktualizować danych."
+var errorRecipeExists = errors.New("Recipe is already on favorites list")
 
 type Handler struct {
 	CategoryRepository db.CategoryRepository

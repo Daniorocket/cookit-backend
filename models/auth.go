@@ -15,13 +15,14 @@ var ErrCreateUser = errors.New("Failed to create user record")
 var ErrFindUser = errors.New("Failed to find user record")
 
 type User struct {
-	ID               string `json:"id" bson:"id"`
-	Username         string `json:"username" bson:"username"`
-	Password         string `json:"-" bson:"password"`
-	AvatarURL        string `json:"avatarURL" bson:"avatar_url"`
-	Email            string `json:"email" bson:"email"`
-	Description      string `json:"description" bson:"description"`
-	PasswordRemindID string `json:"-" bson:"password_remind_id"`
+	ID               string   `json:"id" bson:"id"`
+	Username         string   `json:"username" bson:"username"`
+	Password         string   `json:"-" bson:"password"`
+	AvatarURL        string   `json:"avatarURL" bson:"avatar_url"`
+	Email            string   `json:"email" bson:"email"`
+	Description      string   `json:"description" bson:"description"`
+	PasswordRemindID string   `json:"-" bson:"password_remind_id"`
+	FavoritesRecipes []Recipe `json:"favoritesRecipes" bson:"favorites_recipes"`
 }
 type Credentials struct {
 	Email    string `json:"email" bson:"email"`
@@ -100,6 +101,7 @@ func (m *MongoAuthRepository) Update(userID string, user User) error {
 			"description":        user.Description,
 			"password_remind_id": user.PasswordRemindID,
 			"username":           user.Username,
+			"favorites_recipes":  user.FavoritesRecipes,
 		}})
 	if err != nil {
 		return err
@@ -116,4 +118,15 @@ func (m *MongoAuthRepository) GetUserByPasswordRemindID(passwordRemindID string)
 		return User{}, err
 	}
 	return user, nil
+}
+func (d *MongoAuthRepository) DeleteUserAccount(userID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection(collectionUsers)
+	result, err := collection.DeleteOne(ctx, bson.M{"id": userID})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("deleted  %v document(s)\n", result.DeletedCount)
+	return nil
 }

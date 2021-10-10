@@ -78,10 +78,11 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := models.User{
-		ID:       uuid.NewV4().String(),
-		Email:    cred.Email,
-		Username: cred.Username,
-		Password: string(hashedPassword),
+		ID:               uuid.NewV4().String(),
+		Email:            cred.Email,
+		Username:         cred.Username,
+		Password:         string(hashedPassword),
+		FavoritesRecipes: []models.Recipe{},
 	}
 
 	if err := d.AuthRepository.Register(user); err != nil {
@@ -224,6 +225,23 @@ func (d *Handler) EditUserAccount(w http.ResponseWriter, r *http.Request) {
 		log.Println("Error:", err)
 		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUpdateData)
 		return
+	}
+	createApiResponse(w, nil, http.StatusOK, "success", noError)
+}
+func (d *Handler) DeleteUserAccount(w http.ResponseWriter, r *http.Request) {
+
+	tkn := r.Context().Value("token").(jwtBody)
+
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUsername)
+		return
+	}
+
+	if err := d.AuthRepository.DeleteUserAccount(user.ID); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorUpdateData)
 	}
 	createApiResponse(w, nil, http.StatusOK, "success", noError)
 }

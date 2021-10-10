@@ -23,6 +23,8 @@ type RecipeRepository interface {
 	GetAll(categories []string, page, limit int, name string) ([]models.Recipe, int64, error)
 	GetUnit(unitID string) (models.Unit, error)
 	GetAllUnits() ([]models.Unit, error)
+	GetByID(id string) (models.Recipe, error)
+	Delete(id string) error
 }
 
 type AuthRepository interface {
@@ -32,6 +34,7 @@ type AuthRepository interface {
 	CheckEmail(email string) (models.User, error)
 	Update(userID string, user models.User) error
 	GetUserByPasswordRemindID(passwordRemindID string) (models.User, error)
+	DeleteUserAccount(userID string) error
 }
 
 func InitMongoDatabase() (CategoryRepository, RecipeRepository, AuthRepository, error) {

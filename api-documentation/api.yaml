@@ -369,6 +369,24 @@ paths:
             description: "successful operation"
         security:
         - token: []
+  /v1/usun-konto:
+    delete:
+      tags:
+      - "auth"
+      summary: "Delete user account using JWT"
+      description: "This method delete user account. Method require valid JWT of logged user who want to delete account"
+      operationId: "deleteuseraccount"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      responses:
+          "200":
+            description: "successful operation"
+          "400":
+            description: "Bad request"
+      security:
+        - token: []
   /v1/utworz-kategorie:
       post:
         tags:
@@ -520,11 +538,81 @@ paths:
           description: "Bad request"
         "401":
           description: "Unauthorized"
-  /v1/recipes/jednostki:
+  /v1/przepis/{id}:
     get:
       tags:
       - "recipe"
-      summary: "Get all units"
+      summary: "Get recipe by ID"
+      description: "This method return single category object with passed ID."
+      operationId: "getrecipebyid"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          description: "ID should be UUIDV4 string"
+          type: "string"
+      responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/Recipe"
+  /v1/usun-przepis/{id}:
+    delete:
+      tags:
+      - "recipe"
+      summary: "Delete recipe by ID"
+      description: "This method delete recipe of passed ID from DB."
+      operationId: "deleterecipe"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          description: "ID should be UUIDV4 string"
+          type: "string"
+      responses:
+          "200":
+            description: "successful operation"
+          "400":
+            description: "Bad request"
+      security:
+        - token: []
+  /v1/dodaj-do-ulubionych/{id}:
+    get:
+      tags:
+      - "recipe"
+      summary: "Add recipe to favorites list"
+      description: "This method add a recipe with ID in url address to a user list favorites recipes Require auth."
+      operationId: "addrecipetofavorites"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          description: "ID should be UUIDV4 string"
+          type: "string"
+      responses:
+          "200":
+            description: "successful operation"
+          "400":
+            description: "Bad request"
+      security:
+        - token: []
+  /v1/jednostki:
+    get:
+      tags:
+      - "recipe"
+      summary: "Get all units used in recipes"
       description: "This method allow to get all units used in recipes."
       operationId: "getunits"
       produces:
@@ -656,6 +744,10 @@ definitions:
             type: "string"
       description:
         type: "string"
+      preparingTime:
+        type: "string"
+      file:
+          $ref: "#/definitions/File"
   ApiResponse:
     type: "object"
     properties:

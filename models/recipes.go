@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Daniorocket/cookit-backend/lib"
@@ -122,4 +123,25 @@ func (m *MongoRecipeRepository) GetAllUnits() ([]Unit, error) {
 		units = append(units, unit)
 	}
 	return units, nil
+}
+func (d *MongoRecipeRepository) GetByID(id string) (Recipe, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection("recipes")
+	rec := Recipe{}
+	if err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&rec); err != nil {
+		return Recipe{}, err
+	}
+	return rec, nil
+}
+func (d *MongoRecipeRepository) Delete(id string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection("recipes")
+	result, err := collection.DeleteOne(ctx, bson.M{"id": id})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("deleted  %v document(s)\n", result.DeletedCount)
+	return nil
 }

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/validator.v2"
 )
@@ -100,4 +101,81 @@ func (d *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	createApiResponse(w, units, http.StatusOK, "success", noError)
+}
+func (d *Handler) GetRecipeByID(w http.ResponseWriter, r *http.Request) {
+
+	id := mux.Vars(r)["id"]
+
+	recipe, err := d.RecipeRepository.GetByID(id)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetCategory)
+		return
+	}
+	createApiResponse(w, recipe, http.StatusOK, "success", noError)
+}
+func (d *Handler) AddToFavorites(w http.ResponseWriter, r *http.Request) {
+
+	tkn := r.Context().Value("token").(jwtBody)
+	id := mux.Vars(r)["id"]
+
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUsername)
+		return
+	}
+
+	rec, err := d.RecipeRepository.GetByID(id)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetCategory)
+		return
+	}
+	for _, v := range user.FavoritesRecipes {
+		if v.ID == rec.ID {
+			log.Println("Error:", errorRecipeExists)
+			createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUpdateData)
+			return
+		}
+	}
+	user.FavoritesRecipes = append(user.FavoritesRecipes, rec)
+	if err := d.AuthRepository.Update(user.ID, user); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUpdateData)
+		return
+	}
+
+	createApiResponse(w, nil, http.StatusOK, "success", noError)
+}
+
+func (d *Handler) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
+
+	tkn := r.Context().Value("token").(jwtBody)
+	id := mux.Vars(r)["id"]
+
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUsername)
+		return
+	}
+
+	rec, err := d.RecipeRepository.GetByID(id)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetCategory)
+		return
+	}
+
+	if user.Username != rec.Username {
+		log.Println("Unathorized operation")
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorUpdateData)
+		return
+	}
+	if err := d.RecipeRepository.Delete(rec.ID); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorUpdateData)
+	}
+	createApiResponse(w, nil, http.StatusOK, "success", noError)
 }
