@@ -78,10 +78,11 @@ func (d *Handler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := models.User{
-		ID:       uuid.NewV4().String(),
-		Email:    cred.Email,
-		Username: cred.Username,
-		Password: string(hashedPassword),
+		ID:               uuid.NewV4().String(),
+		Email:            cred.Email,
+		Username:         cred.Username,
+		Password:         string(hashedPassword),
+		FavoritesRecipes: []models.Recipe{},
 	}
 
 	if err := d.AuthRepository.Register(user); err != nil {

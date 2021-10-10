@@ -542,6 +542,28 @@ paths:
             description: "successful operation"
             schema:
               $ref: "#/definitions/Recipe"
+  /v1/dodaj-do-ulubionych/{id}:
+    get:
+      tags:
+      - "recipe"
+      summary: "Add recipe to favorites list"
+      description: "This method add a recipe with ID in url address to a user list favorites recipes Require auth."
+      operationId: "addrecipetofavorites"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+        - in: "path"
+          name: "id"
+          required: true
+          description: "ID should be UUIDV4 string"
+          type: "string"
+      responses:
+          "200":
+            description: "successful operation"
+          "400":
+            description: "Bad request"
   /v1/jednostki:
     get:
       tags:

@@ -110,11 +110,18 @@ func initRoutes(handler handlers.Handler) Routes {
 			handler.GetUnits,
 		},
 		Route{
-			"GetUnits",
+			"GetRecipeByID",
 			"GET",
 			"/api/v1/przepis/{id}",
-			true,
+			false,
 			handler.GetRecipeByID,
+		},
+		Route{
+			"AddToFavorites",
+			"GET",
+			"/api/v1/dodaj-do-ulubionych/{id}",
+			true,
+			handler.AddToFavorites,
 		},
 	}
 }

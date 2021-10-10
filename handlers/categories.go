@@ -11,7 +11,7 @@ import (
 	"gopkg.in/validator.v2"
 )
 
-var errorGetCategory = "Nie można pobrać listy kategorii"
+var errorGetCategory = "Nie można pobrać kategorii"
 var errorCreateCategory = "Nie można utworzyć kategorii z wprowadzonymi danymi"
 
 func (d *Handler) GetListOfCategories(w http.ResponseWriter, r *http.Request) {

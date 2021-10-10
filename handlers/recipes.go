@@ -114,3 +114,37 @@ func (d *Handler) GetRecipeByID(w http.ResponseWriter, r *http.Request) {
 	}
 	createApiResponse(w, recipe, http.StatusOK, "success", noError)
 }
+func (d *Handler) AddToFavorites(w http.ResponseWriter, r *http.Request) {
+
+	tkn := r.Context().Value("token").(jwtBody)
+	id := mux.Vars(r)["id"]
+
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUsername)
+		return
+	}
+
+	rec, err := d.RecipeRepository.GetByID(id)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetCategory)
+		return
+	}
+	for _, v := range user.FavoritesRecipes {
+		if v.ID == rec.ID {
+			log.Println("Error:", errorRecipeExists)
+			createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUpdateData)
+			return
+		}
+	}
+	user.FavoritesRecipes = append(user.FavoritesRecipes, rec)
+	if err := d.AuthRepository.Update(user.ID, user); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUpdateData)
+		return
+	}
+
+	createApiResponse(w, nil, http.StatusOK, "success", noError)
+}
