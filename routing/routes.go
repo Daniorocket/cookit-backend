@@ -123,5 +123,19 @@ func initRoutes(handler handlers.Handler) Routes {
 			true,
 			handler.AddToFavorites,
 		},
+		Route{
+			"DeleteRecipe",
+			"DELETE",
+			"/api/v1/usun-przepis/{id}",
+			true,
+			handler.DeleteRecipe,
+		},
+		Route{
+			"DeleteUserAccount",
+			"DELETE",
+			"/api/v1/usun-konto",
+			true,
+			handler.DeleteUserAccount,
+		},
 	}
 }

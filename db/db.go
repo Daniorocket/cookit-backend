@@ -24,6 +24,7 @@ type RecipeRepository interface {
 	GetUnit(unitID string) (models.Unit, error)
 	GetAllUnits() ([]models.Unit, error)
 	GetByID(id string) (models.Recipe, error)
+	Delete(id string) error
 }
 
 type AuthRepository interface {
@@ -33,6 +34,7 @@ type AuthRepository interface {
 	CheckEmail(email string) (models.User, error)
 	Update(userID string, user models.User) error
 	GetUserByPasswordRemindID(passwordRemindID string) (models.User, error)
+	DeleteUserAccount(userID string) error
 }
 
 func InitMongoDatabase() (CategoryRepository, RecipeRepository, AuthRepository, error) {

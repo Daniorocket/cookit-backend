@@ -228,3 +228,20 @@ func (d *Handler) EditUserAccount(w http.ResponseWriter, r *http.Request) {
 	}
 	createApiResponse(w, nil, http.StatusOK, "success", noError)
 }
+func (d *Handler) DeleteUserAccount(w http.ResponseWriter, r *http.Request) {
+
+	tkn := r.Context().Value("token").(jwtBody)
+
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUsername)
+		return
+	}
+
+	if err := d.AuthRepository.DeleteUserAccount(user.ID); err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorUpdateData)
+	}
+	createApiResponse(w, nil, http.StatusOK, "success", noError)
+}

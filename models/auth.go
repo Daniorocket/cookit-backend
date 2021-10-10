@@ -119,3 +119,14 @@ func (m *MongoAuthRepository) GetUserByPasswordRemindID(passwordRemindID string)
 	}
 	return user, nil
 }
+func (d *MongoAuthRepository) DeleteUserAccount(userID string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection(collectionUsers)
+	result, err := collection.DeleteOne(ctx, bson.M{"id": userID})
+	if err != nil {
+		return err
+	}
+	fmt.Printf("deleted  %v document(s)\n", result.DeletedCount)
+	return nil
+}
