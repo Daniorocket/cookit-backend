@@ -23,6 +23,7 @@ type RecipeRepository interface {
 	GetAll(categories []string, page, limit int, name string) ([]models.Recipe, int64, error)
 	GetUnit(unitID string) (models.Unit, error)
 	GetAllUnits() ([]models.Unit, error)
+	GetByID(id string) (models.Recipe, error)
 }
 
 type AuthRepository interface {

@@ -8,6 +8,7 @@ import (
 
 	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
+	"github.com/gorilla/mux"
 	uuid "github.com/satori/go.uuid"
 	"gopkg.in/validator.v2"
 )
@@ -100,4 +101,16 @@ func (d *Handler) GetUnits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	createApiResponse(w, units, http.StatusOK, "success", noError)
+}
+func (d *Handler) GetRecipeByID(w http.ResponseWriter, r *http.Request) {
+
+	id := mux.Vars(r)["id"]
+
+	recipe, err := d.RecipeRepository.GetByID(id)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetCategory)
+		return
+	}
+	createApiResponse(w, recipe, http.StatusOK, "success", noError)
 }

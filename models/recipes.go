@@ -123,3 +123,13 @@ func (m *MongoRecipeRepository) GetAllUnits() ([]Unit, error) {
 	}
 	return units, nil
 }
+func (d *MongoRecipeRepository) GetByID(id string) (Recipe, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection("recipes")
+	rec := Recipe{}
+	if err := collection.FindOne(ctx, bson.M{"id": id}).Decode(&rec); err != nil {
+		return Recipe{}, err
+	}
+	return rec, nil
+}

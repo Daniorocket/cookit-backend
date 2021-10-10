@@ -109,5 +109,12 @@ func initRoutes(handler handlers.Handler) Routes {
 			true,
 			handler.GetUnits,
 		},
+		Route{
+			"GetUnits",
+			"GET",
+			"/api/v1/przepis/{id}",
+			true,
+			handler.GetRecipeByID,
+		},
 	}
 }
