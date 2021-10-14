@@ -45,7 +45,7 @@ type apiResponse struct {
 func AuthenticateMiddleware(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch mux.CurrentRoute(r).GetName() {
-		case "ListRecipes", "Login", "Register", "ListCategories", "GetCategoryByID", "GetRecipesByCategories", "RemindPassword", "ResetPassword", "GetUnits":
+		case "ListRecipes", "Login", "Register", "ListCategories", "GetCategoryByID", "GetRecipesByCategories", "RemindPassword", "ResetPassword", "GetUnits", "GetRecipeByID":
 			h.ServeHTTP(w, r)
 		default:
 			tkn, username, err := lib.VerifyAndReturnJWT(w, r)
