@@ -25,6 +25,7 @@ type RecipeRepository interface {
 	GetAllUnits() ([]models.Unit, error)
 	GetByID(id string) (models.Recipe, error)
 	Delete(id string) error
+	GetByUser(username string, page, limit int) ([]models.Recipe, int64, error)
 }
 
 type AuthRepository interface {

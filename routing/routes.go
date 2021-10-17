@@ -137,5 +137,12 @@ func initRoutes(handler handlers.Handler) Routes {
 			true,
 			handler.DeleteUserAccount,
 		},
+		Route{
+			"GetUserRecipes",
+			"GET",
+			"/api/v1/przepisy-uzytkownika",
+			true,
+			handler.GetUserRecipes,
+		},
 	}
 }
