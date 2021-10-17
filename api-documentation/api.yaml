@@ -560,6 +560,35 @@ paths:
             description: "successful operation"
             schema:
               $ref: "#/definitions/Recipe"
+  /v1/przepisy-uzytkownika:
+    get:
+      tags:
+      - "recipe"
+      summary: "Get list of recipes which were created by already logged user"
+      description: "This method return list of recipes created by already logged user. Auth is needed - information about user is passed by valid jwt."
+      operationId: "getrecipesbyusername"
+      consumes:
+      - "application/json"
+      produces:
+      - "application/json"
+      parameters:
+      - in: "query"
+        name: "page"
+        description: ""
+        required: true
+        type: "integer"
+      - in: "query"
+        name: "limit"
+        description: ""
+        required: true
+        type: "integer"
+      responses:
+        "200":
+          description: "Successful operation"
+        "400":
+          description: "Bad request"
+        "401":
+          description: "Unauthorized"
   /v1/usun-przepis/{id}:
     delete:
       tags:

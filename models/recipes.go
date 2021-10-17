@@ -145,3 +145,28 @@ func (d *MongoRecipeRepository) Delete(id string) error {
 	fmt.Printf("deleted  %v document(s)\n", result.DeletedCount)
 	return nil
 }
+func (d *MongoRecipeRepository) GetByUser(username string, page, limit int) ([]Recipe, int64, error) {
+	var recipe Recipe
+	recipes := []Recipe{}
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	collection := d.DbPointer.Database(d.DatabaseName).Collection(collectionRecipes)
+	findOptions := options.Find()
+	findOptions.SetLimit(int64(limit))
+	findOptions.SetSkip(int64((page - 1) * limit))
+	cursor, err := collection.Find(ctx, bson.M{"username": username}, findOptions)
+	if err != nil {
+		return nil, 0, err
+	}
+	for cursor.Next(ctx) {
+		if err = cursor.Decode(&recipe); err != nil {
+			return nil, 0, err
+		}
+		recipes = append(recipes, recipe)
+	}
+	totalElements, err := collection.CountDocuments(ctx, bson.M{}, nil)
+	if err != nil {
+		return nil, 0, err
+	}
+	return recipes, totalElements, nil
+}

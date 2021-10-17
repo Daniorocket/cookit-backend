@@ -179,3 +179,34 @@ func (d *Handler) DeleteRecipe(w http.ResponseWriter, r *http.Request) {
 	}
 	createApiResponse(w, nil, http.StatusOK, "success", noError)
 }
+func (d *Handler) GetUserRecipes(w http.ResponseWriter, r *http.Request) {
+	tkn := r.Context().Value("token").(jwtBody)
+
+	page, limit, err := lib.GetPageAndLimitFromRequest(r)
+	if err != nil {
+		createApiResponse(w, nil, http.StatusInternalServerError, "failed", errorGetRecipes)
+		log.Println("Error:", err)
+		return
+	}
+
+	user, err := d.AuthRepository.GetUserinfo(tkn.Username)
+	if err != nil {
+		log.Println("Error:", err)
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorUsername)
+		return
+	}
+	recipes, te, err := d.RecipeRepository.GetByUser(user.Username, page, limit)
+	if err != nil {
+		createApiResponse(w, nil, http.StatusBadRequest, "failed", errorGetRecipes)
+		return
+	}
+	createApiResponse(w, paginationResponse{
+		Data:          recipes,
+		Limit:         limit,
+		Page:          page,
+		TotalElements: te,
+	},
+		http.StatusOK,
+		"success",
+		noError)
+}
