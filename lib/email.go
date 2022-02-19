@@ -1,21 +1,30 @@
 package lib
 
 import (
-	"net/smtp"
+	"crypto/tls"
 	"os"
+	"strconv"
+
+	gomail "gopkg.in/mail.v2"
 )
 
 func CreateEmail(to, subject, msg string) error {
 
-	toList := []string{to}
 	host := os.Getenv("Email_HOST")
-	username := os.Getenv("EMAIL_LOGIN")
+	senderEmail := os.Getenv("EMAIL_LOGIN")
 	password := os.Getenv("EMAIL_PASSWORD")
-	port := os.Getenv("Email_PORT")
-	body := []byte(msg)
-	auth := smtp.PlainAuth("", username, password, host)
-
-	if err := smtp.SendMail(host+":"+port, auth, username, toList, body); err != nil {
+	port, err := strconv.Atoi(os.Getenv("Email_PORT"))
+	if err != nil {
+		return err
+	}
+	m := gomail.NewMessage()
+	m.SetHeader("From", senderEmail)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/plain", msg)
+	d := gomail.NewDialer(host, port, senderEmail, password)
+	d.TLSConfig = &tls.Config{InsecureSkipVerify: true}
+	if err := d.DialAndSend(m); err != nil {
 		return err
 	}
 	return nil
