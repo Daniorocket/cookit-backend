@@ -47,6 +47,11 @@ type MongoRecipeRepository struct {
 	DatabaseName string
 }
 
+type PostgreSQLRecipeRepository struct {
+	ConStr       string
+	DatabaseName string
+}
+
 func (m *MongoRecipeRepository) Create(recipe Recipe) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -169,4 +174,39 @@ func (d *MongoRecipeRepository) GetByUser(username string, page, limit int) ([]R
 		return nil, 0, err
 	}
 	return recipes, totalElements, nil
+}
+
+func (p *PostgreSQLRecipeRepository) Create(recipe Recipe) error {
+	fmt.Println("Not implemented yet")
+	return nil
+}
+
+func (p *PostgreSQLRecipeRepository) Delete(id string) error {
+	fmt.Println("Not implemented yet")
+	return nil
+}
+
+func (p *PostgreSQLRecipeRepository) GetAll(categories []string, page, limit int, name string) ([]Recipe, int64, error) {
+	fmt.Println("Not implemented yet")
+	return nil, 0, nil
+}
+
+func (p *PostgreSQLRecipeRepository) GetAllUnits() ([]Unit, error) {
+	fmt.Println("Not implemented yet")
+	return nil, nil
+}
+
+func (p *PostgreSQLRecipeRepository) GetByID(id string) (Recipe, error) {
+	fmt.Println("Not implemented yet")
+	return Recipe{}, nil
+}
+
+func (p *PostgreSQLRecipeRepository) GetByUser(username string, page, limit int) ([]Recipe, int64, error) {
+	fmt.Println("Not implemented yet")
+	return nil, 0, nil
+}
+
+func (p *PostgreSQLRecipeRepository) GetUnit(unitID string) (Unit, error) {
+	fmt.Println("Not implemented yet")
+	return Unit{}, nil
 }

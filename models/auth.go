@@ -6,13 +6,14 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Daniorocket/cookit-backend/lib"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 var collectionUsers = "users"
-var ErrCreateUser = errors.New("Failed to create user record")
-var ErrFindUser = errors.New("Failed to find user record")
+var ErrCreateUser = errors.New("failed to create user record")
+var ErrFindUser = errors.New("failed to find user record")
 
 type User struct {
 	ID               string   `json:"id" bson:"id"`
@@ -45,6 +46,11 @@ type MongoAuthRepository struct {
 	DatabaseName string
 }
 
+type PostgreSQLAuthRepository struct {
+	ConStr       string
+	DatabaseName string
+}
+
 func (m *MongoAuthRepository) Register(user User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -66,7 +72,7 @@ func (m *MongoAuthRepository) GetPassword(login string) (string, error) {
 	if err := collection.FindOne(ctx, bson.M{"email": login}).Decode(&user); err == nil {
 		return user.Password, nil
 	}
-	return "", errors.New("Failed to find user with passed login")
+	return "", errors.New("failed to find user with passed login")
 }
 
 func (m *MongoAuthRepository) GetUserinfo(username string) (User, error) {
@@ -128,5 +134,52 @@ func (d *MongoAuthRepository) DeleteUserAccount(userID string) error {
 		return err
 	}
 	fmt.Printf("deleted  %v document(s)\n", result.DeletedCount)
+	return nil
+}
+
+func (p *PostgreSQLAuthRepository) CheckEmail(email string) (User, error) {
+	fmt.Println("Not implemented yet")
+	return User{}, nil
+}
+
+func (p *PostgreSQLAuthRepository) DeleteUserAccount(userID string) error {
+	fmt.Println("Not implemented yet")
+	return nil
+}
+
+func (p *PostgreSQLAuthRepository) GetPassword(login string) (string, error) {
+	fmt.Println("Not implemented yet")
+	return "", nil
+}
+
+func (p *PostgreSQLAuthRepository) GetUserByPasswordRemindID(passwordRemindID string) (User, error) {
+	fmt.Println("Not implemented yet")
+	return User{}, nil
+}
+
+func (p *PostgreSQLAuthRepository) GetUserinfo(username string) (User, error) {
+	fmt.Println("Not implemented yet")
+	return User{}, nil
+}
+
+func (p *PostgreSQLAuthRepository) Register(user User) error {
+	fmt.Println("user:", user)
+	db, err := lib.ConnectPostgres(p.ConStr)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	stmt, err := db.Prepare("INSERT INTO users(id,username,password,email) VALUES($1,$2,$3,$4);")
+	if err != nil {
+		return err
+	}
+	if _, err := stmt.Exec(user.ID, user.Username, user.Password, user.Email); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (p *PostgreSQLAuthRepository) Update(userID string, user User) error {
+	fmt.Println("Not implemented yet")
 	return nil
 }

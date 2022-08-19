@@ -5,10 +5,10 @@ go 1.15
 require (
 	github.com/aws/aws-sdk-go v1.37.11 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/golang/snappy v0.0.2 // indirect
 	github.com/gorilla/mux v1.8.0
 	github.com/klauspost/compress v1.11.7 // indirect
+	github.com/lib/pq v1.10.6 // indirect
 	github.com/satori/go.uuid v1.2.0
 	go.mongodb.org/mongo-driver v1.4.6
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad

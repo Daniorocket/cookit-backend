@@ -6,7 +6,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/Daniorocket/cookit-backend/lib"
 	"github.com/Daniorocket/cookit-backend/models"
+	_ "github.com/lib/pq"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -109,5 +111,28 @@ func InitMongoDatabase() (CategoryRepository, RecipeRepository, AuthRepository, 
 			return nil, nil, nil, err
 		}
 	}
+	return categoryRepository, recipeRepository, authRepository, nil
+}
+
+func InitPostgreSQLDatabase() (CategoryRepository, RecipeRepository, AuthRepository, error) {
+	db, err := lib.ConnectPostgres(os.Getenv("POSTGRES_URL"))
+	if err != nil {
+		return nil, nil, nil, err
+	}
+	defer db.Close()
+
+	categoryRepository := &models.PostgreSQLCategoryRepository{
+		ConStr:       os.Getenv("POSTGRES_URL"),
+		DatabaseName: os.Getenv("DBName"),
+	}
+	recipeRepository := &models.PostgreSQLRecipeRepository{
+		ConStr:       os.Getenv("POSTGRES_URL"),
+		DatabaseName: os.Getenv("DBName"),
+	}
+	authRepository := &models.PostgreSQLAuthRepository{
+		ConStr:       os.Getenv("POSTGRES_URL"),
+		DatabaseName: os.Getenv("DBName"),
+	}
+
 	return categoryRepository, recipeRepository, authRepository, nil
 }

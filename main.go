@@ -12,7 +12,7 @@ import (
 
 func main() {
 	port := os.Getenv("PORT")
-	categoryRepository, recipeRepository, authRepository, err := db.InitMongoDatabase()
+	categoryRepository, recipeRepository, authRepository, err := db.InitPostgreSQLDatabase()
 	if err != nil {
 		log.Print("Failed to init database:", err)
 		return

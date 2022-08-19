@@ -2,6 +2,7 @@ package models
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Daniorocket/cookit-backend/lib"
@@ -20,6 +21,11 @@ type Category struct {
 
 type MongoCategoryRepository struct {
 	DbPointer    *mongo.Client
+	DatabaseName string
+}
+
+type PostgreSQLCategoryRepository struct {
+	ConStr       string
 	DatabaseName string
 }
 
@@ -67,4 +73,19 @@ func (d *MongoCategoryRepository) GetAll(page, limit int) ([]Category, int64, er
 		return nil, 0, err
 	}
 	return categories, totalElements, nil
+}
+
+func (p *PostgreSQLCategoryRepository) Create(c Category) error {
+	fmt.Println("Not implemented yet")
+	return nil
+}
+
+func (p *PostgreSQLCategoryRepository) GetAll(page, limit int) ([]Category, int64, error) {
+	fmt.Println("Not implemented yet")
+	return nil, 0, nil
+}
+
+func (p *PostgreSQLCategoryRepository) GetByID(id string) (Category, error) {
+	fmt.Println("Not implemented yet")
+	return Category{}, nil
 }
