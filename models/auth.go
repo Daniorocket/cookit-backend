@@ -148,8 +148,21 @@ func (p *PostgreSQLAuthRepository) DeleteUserAccount(userID string) error {
 }
 
 func (p *PostgreSQLAuthRepository) GetPassword(login string) (string, error) {
-	fmt.Println("Not implemented yet")
-	return "", nil
+	var password string
+	db, err := lib.ConnectPostgres(p.ConStr)
+	if err != nil {
+		return password, err
+	}
+	defer db.Close()
+	stmt, err := db.Prepare("SELECT password FROM users WHERE username = $1")
+	if err != nil {
+		return password, err
+	}
+	err = stmt.QueryRow(login).Scan(&password)
+	if err != nil {
+		return password, err
+	}
+	return password, nil
 }
 
 func (p *PostgreSQLAuthRepository) GetUserByPasswordRemindID(passwordRemindID string) (User, error) {
@@ -163,7 +176,6 @@ func (p *PostgreSQLAuthRepository) GetUserinfo(username string) (User, error) {
 }
 
 func (p *PostgreSQLAuthRepository) Register(user User) error {
-	fmt.Println("user:", user)
 	db, err := lib.ConnectPostgres(p.ConStr)
 	if err != nil {
 		return err
