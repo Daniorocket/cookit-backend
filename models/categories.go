@@ -76,7 +76,25 @@ func (d *MongoCategoryRepository) GetAll(page, limit int) ([]Category, int64, er
 }
 
 func (p *PostgreSQLCategoryRepository) Create(c Category) error {
-	fmt.Println("Not implemented yet")
+	db, err := lib.ConnectPostgres(p.ConStr)
+	if err != nil {
+		return err
+	}
+	defer db.Close()
+	stmt, err := db.Prepare("INSERT INTO files(id,encodedURL,extension) VALUES($1,$2,$3);")
+	if err != nil {
+		return err
+	}
+	if _, err := stmt.Exec(c.ID, c.File.EncodedURL, c.File.Extension); err != nil {
+		return err
+	}
+	stmt, err = db.Prepare("INSERT INTO categories(id,name) VALUES($1,$2);")
+	if err != nil {
+		return err
+	}
+	if _, err := stmt.Exec(c.ID, c.Name); err != nil {
+		return err
+	}
 	return nil
 }
 
